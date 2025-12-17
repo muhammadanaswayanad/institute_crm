@@ -61,6 +61,7 @@
                     
                     <group>
                         <group string="Assignment">
+                            <field name="company_id" invisible="1"/>
                             <field name="user_id" string="Salesperson" domain="[('share', '=', False)]"/>
                             <field name="team_id" widget="selection"/>
                             <field name="date_deadline" string="Expected Closing Date"/>
