@@ -27,6 +27,7 @@
                             <field name="street" string="Address" placeholder="Street address"/>
                             <field name="district" placeholder="District"/>
                             <field name="city" placeholder="City"/>
+                            <field name="country_id" invisible="1"/>
                             <field name="state_id" placeholder="State"/>
                         </group>
                         
