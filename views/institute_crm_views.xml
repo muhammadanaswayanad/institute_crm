@@ -12,12 +12,6 @@
                     <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
-                    <!-- Hidden fields for student_management module integration -->
-                    <!-- These must be loaded early so buttons can reference them -->
-                    <field name="student_profile_created" invisible="1"/>
-                    <field name="is_won_stage" invisible="1"/>
-                    <field name="student_count" invisible="1"/>
-                    
                     <!-- Smart Buttons Box (for student_management module injection) -->
                     <div class="oe_button_box" name="button_box">
                         <!-- Student buttons will be injected here by student_management module -->
