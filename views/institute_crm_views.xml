@@ -5,7 +5,7 @@
     <record id="view_institute_crm_lead_form" model="ir.ui.view">
         <field name="name">institute.crm.lead.form</field>
         <field name="model">crm.lead</field>
-        <field name="priority">20</field>
+        <field name="priority">1</field>
         <field name="arch" type="xml">
             <form string="Student Lead">
                 <header>
@@ -106,7 +106,7 @@
     <record id="view_institute_crm_lead_tree" model="ir.ui.view">
         <field name="name">institute.crm.lead.tree</field>
         <field name="model">crm.lead</field>
-        <field name="priority">20</field>
+        <field name="priority">1</field>
         <field name="arch" type="xml">
             <tree string="Student Leads" sample="1">
                 <field name="student_name" string="Student"/>
@@ -128,7 +128,7 @@
     <record id="view_institute_crm_lead_kanban" model="ir.ui.view">
         <field name="name">institute.crm.lead.kanban</field>
         <field name="model">crm.lead</field>
-        <field name="priority">20</field>
+        <field name="priority">1</field>
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id" class="o_kanban_small_column" on_create="quick_create" sample="1">
                 <field name="student_name"/>
@@ -199,7 +199,7 @@
     <record id="view_institute_crm_lead_search" model="ir.ui.view">
         <field name="name">institute.crm.lead.search</field>
         <field name="model">crm.lead</field>
-        <field name="priority">20</field>
+        <field name="priority">1</field>
         <field name="arch" type="xml">
             <search string="Search Student Leads">
                 <field name="student_name" string="Student" filter_domain="[('student_name', 'ilike', self)]"/>
