@@ -119,6 +119,7 @@
                 <field name="lead_source_type" string="Source"/>
                 <field name="follow_up_date" string="Follow-up"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="is_won" column_invisible="1"/>
                 <field name="stage_id" widget="badge" decoration-success="is_won"/>
                 <field name="activity_ids" widget="list_activity"/>
             </tree>
