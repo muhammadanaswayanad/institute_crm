@@ -24,10 +24,23 @@ class CrmLeadInstitute(models.Model):
         string='Alternative Number',
         help='Alternative contact number'
     )
-    district = fields.Char(
-        string='District',
-        help='District in the address'
-    )
+    district = fields.Selection([
+        ('thiruvananthapuram', 'Thiruvananthapuram'),
+        ('kollam', 'Kollam'),
+        ('pathanamthitta', 'Pathanamthitta'),
+        ('alappuzha', 'Alappuzha'),
+        ('kottayam', 'Kottayam'),
+        ('idukki', 'Idukki'),
+        ('ernakulam', 'Ernakulam'),
+        ('thrissur', 'Thrissur'),
+        ('palakkad', 'Palakkad'),
+        ('malappuram', 'Malappuram'),
+        ('kozhikode', 'Kozhikode'),
+        ('wayanad', 'Wayanad'),
+        ('kannur', 'Kannur'),
+        ('kasaragod', 'Kasaragod'),
+        ('outside_kerala', 'Outside Kerala'),
+    ], string='District', help='District in Kerala or outside')
 
     # Academic Background
     present_qualification = fields.Selection([
@@ -43,9 +56,11 @@ class CrmLeadInstitute(models.Model):
         help='Current or previous institution name'
     )
     
-    course_interested = fields.Char(
+    course_interested = fields.Many2one(
+        'product.product',
         string='Course Interested',
-        help='Course the student is interested in'
+        help='Course the student is interested in',
+        domain=[('type', '=', 'service')]
     )
 
     # Lead Source Information

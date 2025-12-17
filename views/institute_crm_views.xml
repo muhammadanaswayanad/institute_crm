@@ -25,7 +25,7 @@
                             <field name="student_phone" placeholder="Student contact number" widget="phone"/>
                             <field name="alternative_phone" placeholder="Alternative contact number" widget="phone"/>
                             <field name="street" string="Address" placeholder="Street address"/>
-                            <field name="district" placeholder="District"/>
+                            <field name="district"/>
                             <field name="city" placeholder="City"/>
                             <field name="country_id" invisible="1"/>
                             <field name="state_id" placeholder="State"/>
@@ -34,7 +34,7 @@
                         <group string="Academic Background">
                             <field name="present_qualification"/>
                             <field name="school_college" placeholder="Current/Previous institution"/>
-                            <field name="course_interested" placeholder="e.g., Computer Science, MBA"/>
+                            <field name="course_interested"/>
                         </group>
                     </group>
                     
