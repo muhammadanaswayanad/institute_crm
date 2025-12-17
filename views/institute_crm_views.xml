@@ -5,7 +5,7 @@
     <record id="view_institute_crm_lead_form_inherit" model="ir.ui.view">
         <field name="name">crm.lead.form.institute.inherit</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="inherit_id" ref="crm.crm_case_form_view_leads"/>
         <field name="arch" type="xml">
             
             <!-- Add institute fields after the partner name field -->
@@ -26,7 +26,7 @@
             </xpath>
             
             <!-- Add academic fields in a new group in the main sheet -->
-            <xpath expr="//group[@name='lead_info']" position="after">
+            <xpath expr="//sheet" position="inside">
                 <group string="Academic Background" name="academic_info">
                     <field name="present_qualification"/>
                     <field name="school_college" placeholder="Current/Previous institution"/>
@@ -42,7 +42,7 @@
             </xpath>
             
             <!-- Add contact status fields in a new group -->
-            <xpath expr="//group[@name='lead_info']" position="after">
+            <xpath expr="//sheet" position="inside">
                 <group string="Contact Status" name="contact_info">
                     <field name="contact_status"/>
                     <field name="show_follow_up_fields" invisible="1"/>
@@ -59,7 +59,7 @@
     <record id="view_institute_crm_lead_tree_inherit" model="ir.ui.view">
         <field name="name">crm.lead.tree.institute.inherit</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.crm_lead_view_tree"/>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
         <field name="arch" type="xml">
             
             <!-- Add student name column -->
@@ -87,7 +87,7 @@
     <record id="view_institute_crm_lead_kanban_inherit" model="ir.ui.view">
         <field name="name">crm.lead.kanban.institute.inherit</field>
         <field name="model">crm.lead</field>
-        <field name="inherit_id" ref="crm.crm_lead_view_kanban"/>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
         <field name="arch" type="xml">
             
             <!-- Make sure our custom fields are available in kanban -->
