@@ -78,11 +78,13 @@
               sequence="20"/>
 
     <!-- Tags -->
+    <!-- Commented out - crm.crm_tag_action doesn't exist in Odoo 17
     <menuitem id="menu_institute_tags"
               name="Tags"
               parent="menu_institute_crm_config"
               action="crm.crm_tag_action"
               sequence="30"/>
+    -->
 
     <!-- Activity Types -->
     <menuitem id="menu_institute_activity_types"
