@@ -42,14 +42,14 @@
                         <group string="Lead Source">
                             <field name="lead_source_type"/>
                             <field name="is_referral" invisible="1"/>
-                            <field name="referral_type" attrs="{'invisible': [('is_referral', '=', False)], 'required': [('is_referral', '=', True)]}"/>
+                            <field name="referral_type" invisible="is_referral == False" required="is_referral == True"/>
                         </group>
                         
                         <group string="Contact Status">
                             <field name="contact_status"/>
                             <field name="show_follow_up_fields" invisible="1"/>
-                            <field name="follow_up_status" attrs="{'invisible': [('show_follow_up_fields', '=', False)]}"/>
-                            <field name="follow_up_date" attrs="{'invisible': [('show_follow_up_fields', '=', False)]}"/>
+                            <field name="follow_up_status" invisible="show_follow_up_fields == False"/>
+                            <field name="follow_up_date" invisible="show_follow_up_fields == False"/>
                         </group>
                     </group>
                     
