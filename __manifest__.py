@@ -26,10 +26,9 @@
         'security/ir.model.access.csv',
         'data/crm_stage_data.xml',
         'views/institute_crm_views.xml',
-        'views/institute_crm_menu.xml',
     ],
     'installable': True,
-    'application': True,
+    'application': False,
     'auto_install': False,
     'license': 'LGPL-3',
 }
