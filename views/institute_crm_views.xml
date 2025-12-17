@@ -9,6 +9,9 @@
         <field name="arch" type="xml">
             <form string="Student Lead">
                 <header>
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Button injection point for other modules -->
+                    </div>
                     <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
