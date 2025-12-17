@@ -87,11 +87,13 @@
     -->
 
     <!-- Activity Types -->
+    <!-- Commented out - crm.mail_activity_type_action_config_crm doesn't exist in Odoo 17
     <menuitem id="menu_institute_activity_types"
               name="Activity Types"
               parent="menu_institute_crm_config"
               action="crm.mail_activity_type_action_config_crm"
               sequence="40"/>
+    -->
 
     <!-- Reporting Menu -->
     <menuitem id="menu_institute_crm_reporting"
