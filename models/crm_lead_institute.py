@@ -68,27 +68,7 @@ class CrmLeadInstitute(models.Model):
         help='When the student plans to join (e.g., January 2024, Next semester)'
     )
 
-    # Lead Source Information
-    lead_source_type = fields.Selection([
-        ('meta_facebook', 'Meta Facebook'),
-        ('meta_instagram', 'Meta Instagram'),
-        ('google', 'Google'),
-        ('purchased', 'Purchased'),
-        ('referral', 'Referral'),
-    ], string='Lead Source', help='Source from which the lead was generated')
-    
-    referral_type = fields.Selection([
-        ('student', 'Student'),
-        ('staff', 'Staff'),
-        ('teachers', 'Teachers'),
-    ], string='Referral Type', help='Type of referral if source is referral')
-    
-    is_referral = fields.Boolean(
-        string='Is Referral',
-        compute='_compute_is_referral',
-        store=True,
-        help='Technical field to show/hide referral type'
-    )
+    # No custom lead source - using standard source_id field from Odoo CRM
 
     # Contact Status Workflow
     contact_status = fields.Selection([
@@ -120,23 +100,13 @@ class CrmLeadInstitute(models.Model):
         help='Technical field to show/hide follow-up fields'
     )
 
-    @api.depends('lead_source_type')
-    def _compute_is_referral(self):
-        """Compute if the lead source is referral to show/hide referral type field"""
-        for record in self:
-            record.is_referral = record.lead_source_type == 'referral'
+
 
     @api.depends('contact_status')
     def _compute_show_follow_up_fields(self):
         """Compute if follow-up fields should be shown based on contact status"""
         for record in self:
             record.show_follow_up_fields = record.contact_status == 'connected'
-
-    @api.onchange('lead_source_type')
-    def _onchange_lead_source_type(self):
-        """Clear referral type when source is not referral"""
-        if self.lead_source_type != 'referral':
-            self.referral_type = False
 
     @api.onchange('contact_status')
     def _onchange_contact_status(self):

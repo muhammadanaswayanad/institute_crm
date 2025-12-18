@@ -46,9 +46,7 @@
                     
                     <group>
                         <group string="Lead Source">
-                            <field name="lead_source_type"/>
-                            <field name="is_referral" invisible="1"/>
-                            <field name="referral_type" invisible="is_referral == False" required="is_referral == True"/>
+                            <field name="source_id" placeholder="Select lead source"/>
                         </group>
                         
                         <group string="Contact Status">
@@ -121,7 +119,6 @@
                 <field name="course_interested" string="Course"/>
                 <field name="present_qualification" string="Qualification"/>
                 <field name="contact_status" string="Status"/>
-                <field name="lead_source_type" string="Source"/>
                 <field name="follow_up_date" string="Follow-up"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="stage_id" widget="badge"/>
@@ -225,10 +222,7 @@
                 <filter string="Not Connected" name="not_connected" domain="[('contact_status', '=', 'not_connected')]"/>
                 <filter string="Follow-up Due" name="follow_up_due" domain="[('follow_up_date', '&lt;=', context_today().strftime('%Y-%m-%d')), ('follow_up_date', '!=', False)]"/>
                 <separator/>
-                <filter string="Referrals" name="referrals" domain="[('lead_source_type', '=', 'referral')]"/>
-                <filter string="Meta Facebook" name="meta_facebook" domain="[('lead_source_type', '=', 'meta_facebook')]"/>
-                <filter string="Meta Instagram" name="meta_instagram" domain="[('lead_source_type', '=', 'meta_instagram')]"/>
-                <filter string="Google" name="google" domain="[('lead_source_type', '=', 'google')]"/>
+                <filter string="Referrals" name="referrals" domain="[('source_id.name', 'ilike', 'referral')]"/>
                 
                 <separator/>
                 <filter invisible="1" string="Late Activities" name="activities_overdue"
@@ -244,7 +238,7 @@
                     <filter string="Sales Team" name="team" context="{'group_by': 'team_id'}"/>
                     <filter string="Stage" name="stage" context="{'group_by': 'stage_id'}"/>
                     <filter string="Contact Status" name="contact_status_group" context="{'group_by': 'contact_status'}"/>
-                    <filter string="Lead Source" name="source" context="{'group_by': 'lead_source_type'}"/>
+                    <filter string="Lead Source" name="source" context="{'group_by': 'source_id'}"/>
                     <filter string="Qualification" name="qualification" context="{'group_by': 'present_qualification'}"/>
                     <filter string="Follow-up Date" name="follow_up_date_group" context="{'group_by': 'follow_up_date'}"/>
                 </group>
