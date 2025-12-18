@@ -126,6 +126,13 @@ class CrmLeadInstitute(models.Model):
             elif record.phone and not record.student_phone:
                 vals['student_phone'] = record.phone
             
+            # Sync alternative_phone to mobile
+            if record.alternative_phone and record.alternative_phone != record.mobile:
+                vals['mobile'] = record.alternative_phone
+            # Sync mobile to alternative_phone if alternative_phone is empty
+            elif record.mobile and not record.alternative_phone:
+                vals['alternative_phone'] = record.mobile
+            
             # Sync with partner if exists
             if record.partner_id:
                 # Sync student_name to partner name
@@ -138,6 +145,10 @@ class CrmLeadInstitute(models.Model):
                 # Sync phone with partner
                 if record.phone and record.phone != record.partner_id.phone:
                     record.partner_id.phone = record.phone
+                    
+                # Sync mobile with partner
+                if record.mobile and record.mobile != record.partner_id.mobile:
+                    record.partner_id.mobile = record.mobile
             # No partner but student_name exists - set contact_name
             elif record.student_name and not record.contact_name:
                 vals['contact_name'] = record.student_name
@@ -176,6 +187,9 @@ class CrmLeadInstitute(models.Model):
         if self.partner_id and self.partner_id.phone:
             self.student_phone = self.partner_id.phone
             self.phone = self.partner_id.phone
+        if self.partner_id and self.partner_id.mobile:
+            self.alternative_phone = self.partner_id.mobile
+            self.mobile = self.partner_id.mobile
 
     @api.onchange('student_phone')
     def _onchange_student_phone(self):
@@ -191,6 +205,20 @@ class CrmLeadInstitute(models.Model):
         if self.phone:
             self.student_phone = self.phone
 
+    @api.onchange('alternative_phone')
+    def _onchange_alternative_phone(self):
+        """Sync alternative phone to standard mobile field"""
+        if self.alternative_phone:
+            self.mobile = self.alternative_phone
+            if self.partner_id:
+                self.partner_id.mobile = self.alternative_phone
+
+    @api.onchange('mobile')
+    def _onchange_mobile(self):
+        """Sync standard mobile to alternative phone"""
+        if self.mobile:
+            self.alternative_phone = self.mobile
+
     @api.model_create_multi
     def create(self, vals_list):
         """Override create to sync fields"""
@@ -201,6 +229,9 @@ class CrmLeadInstitute(models.Model):
             # Sync student_phone with phone
             if vals.get('student_phone') and not vals.get('phone'):
                 vals['phone'] = vals['student_phone']
+            # Sync alternative_phone with mobile
+            if vals.get('alternative_phone') and not vals.get('mobile'):
+                vals['mobile'] = vals['alternative_phone']
         return super().create(vals_list)
 
     def write(self, vals):
@@ -216,4 +247,12 @@ class CrmLeadInstitute(models.Model):
         # Sync phone to student_phone
         if vals.get('phone') and not vals.get('student_phone'):
             vals['student_phone'] = vals['phone']
+        # Sync alternative_phone to mobile and partner
+        if vals.get('alternative_phone'):
+            vals['mobile'] = vals['alternative_phone']
+            if self.partner_id:
+                self.partner_id.mobile = vals['alternative_phone']
+        # Sync mobile to alternative_phone
+        if vals.get('mobile') and not vals.get('alternative_phone'):
+            vals['alternative_phone'] = vals['mobile']
         return super().write(vals)
