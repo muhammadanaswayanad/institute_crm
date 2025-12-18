@@ -106,6 +106,25 @@
         </field>
     </record>
 
+    <!-- Quick Create Form for New Leads -->
+    <record id="view_institute_crm_lead_form_quick_create" model="ir.ui.view">
+        <field name="name">institute.crm.lead.form.quick.create</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="New Lead" create="true">
+                <group>
+                    <field name="student_name" placeholder="Student Name" required="1"/>
+                    <field name="student_phone" placeholder="Student Number" widget="phone"/>
+                    <field name="alternative_phone" placeholder="Alternative Number" widget="phone"/>
+                    <field name="course_interested" placeholder="Select Course"/>
+                    <field name="source_id" placeholder="Lead Source"/>
+                    <field name="user_id" string="Assign To" placeholder="Select Salesperson"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
     <!-- Simplified Institute CRM Tree View -->
     <record id="view_institute_crm_lead_tree" model="ir.ui.view">
         <field name="name">institute.crm.lead.tree</field>
@@ -133,7 +152,7 @@
         <field name="model">crm.lead</field>
         <field name="priority">1</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="stage_id" class="o_kanban_small_column" on_create="quick_create" sample="1">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column" on_create="quick_create" quick_create_view="institute_crm.view_institute_crm_lead_form_quick_create" sample="1">
                 <field name="student_name"/>
                 <field name="student_phone"/>
                 <field name="course_interested"/>
