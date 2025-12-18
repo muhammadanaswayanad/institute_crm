@@ -140,6 +140,47 @@ class CrmLeadInstitute(models.Model):
             self.follow_up_status = False
             self.follow_up_date = False
 
+    def action_sync_student_fields(self):
+        """Sync student fields with standard CRM fields for existing leads"""
+        for record in self:
+            vals = {}
+            # Sync student_phone to phone
+            if record.student_phone and record.student_phone != record.phone:
+                vals['phone'] = record.student_phone
+            # Sync phone to student_phone if student_phone is empty
+            elif record.phone and not record.student_phone:
+                vals['student_phone'] = record.phone
+            
+            # Sync with partner if exists
+            if record.partner_id:
+                # Sync student_name to partner name
+                if record.student_name and record.student_name != record.partner_id.name:
+                    record.partner_id.name = record.student_name
+                # Sync partner name to student_name if student_name is empty
+                elif record.partner_id.name and not record.student_name:
+                    vals['student_name'] = record.partner_id.name
+                    
+                # Sync phone with partner
+                if record.phone and record.phone != record.partner_id.phone:
+                    record.partner_id.phone = record.phone
+            # No partner but student_name exists - set contact_name
+            elif record.student_name and not record.contact_name:
+                vals['contact_name'] = record.student_name
+            
+            if vals:
+                record.write(vals)
+        
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Sync Complete',
+                'message': f'{len(self)} lead(s) synchronized successfully!',
+                'type': 'success',
+                'sticky': False,
+            }
+        }
+
     # Sync student fields with standard CRM fields
     @api.onchange('student_name')
     def _onchange_student_name(self):
