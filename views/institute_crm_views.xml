@@ -119,6 +119,7 @@
                     <field name="alternative_phone" placeholder="Alternative Number" widget="phone"/>
                     <field name="course_interested" placeholder="Select Course"/>
                     <field name="source_id" placeholder="Lead Source"/>
+                    <field name="company_id" invisible="1"/>
                     <field name="user_id" string="Assign To" placeholder="Select Salesperson"/>
                 </group>
             </form>
