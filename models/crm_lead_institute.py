@@ -62,6 +62,11 @@ class CrmLeadInstitute(models.Model):
         help='Course the student is interested in',
         domain=[('type', '=', 'service')]
     )
+    
+    joining_frequency = fields.Char(
+        string='Joining Frequency',
+        help='When the student plans to join (e.g., January 2024, Next semester)'
+    )
 
     # Lead Source Information
     lead_source_type = fields.Selection([

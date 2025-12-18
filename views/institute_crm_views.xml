@@ -40,6 +40,7 @@
                             <field name="present_qualification"/>
                             <field name="school_college" placeholder="Current/Previous institution"/>
                             <field name="course_interested"/>
+                            <field name="joining_frequency" placeholder="e.g., January 2024, Next semester"/>
                         </group>
                     </group>
                     
