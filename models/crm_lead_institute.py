@@ -139,3 +139,65 @@ class CrmLeadInstitute(models.Model):
         if self.contact_status != 'connected':
             self.follow_up_status = False
             self.follow_up_date = False
+
+    # Sync student fields with standard CRM fields
+    @api.onchange('student_name')
+    def _onchange_student_name(self):
+        """Sync student name to contact name"""
+        if self.student_name and not self.partner_id:
+            # Student name changed but no contact exists
+            # We'll create contact when lead is saved
+            self.contact_name = self.student_name
+        elif self.student_name and self.partner_id:
+            # Update existing contact name
+            self.partner_id.name = self.student_name
+
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        """Sync contact name to student name"""
+        if self.partner_id and self.partner_id.name:
+            self.student_name = self.partner_id.name
+        if self.partner_id and self.partner_id.phone:
+            self.student_phone = self.partner_id.phone
+            self.phone = self.partner_id.phone
+
+    @api.onchange('student_phone')
+    def _onchange_student_phone(self):
+        """Sync student phone to standard phone field"""
+        if self.student_phone:
+            self.phone = self.student_phone
+            if self.partner_id:
+                self.partner_id.phone = self.student_phone
+
+    @api.onchange('phone')
+    def _onchange_phone(self):
+        """Sync standard phone to student phone"""
+        if self.phone:
+            self.student_phone = self.phone
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to sync fields"""
+        for vals in vals_list:
+            # Sync student_name with contact_name for contact creation
+            if vals.get('student_name') and not vals.get('contact_name'):
+                vals['contact_name'] = vals['student_name']
+            # Sync student_phone with phone
+            if vals.get('student_phone') and not vals.get('phone'):
+                vals['phone'] = vals['student_phone']
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Override write to sync fields"""
+        # Sync student_name to partner
+        if vals.get('student_name') and self.partner_id:
+            self.partner_id.name = vals['student_name']
+        # Sync student_phone to phone and partner
+        if vals.get('student_phone'):
+            vals['phone'] = vals['student_phone']
+            if self.partner_id:
+                self.partner_id.phone = vals['student_phone']
+        # Sync phone to student_phone
+        if vals.get('phone') and not vals.get('student_phone'):
+            vals['student_phone'] = vals['phone']
+        return super().write(vals)
