@@ -27,6 +27,7 @@
         # 'data/crm_stage_data.xml',  # Commented out to prevent duplicate stages on upgrade
         'data/crm_actions.xml',
         'views/institute_crm_views.xml',
+        'views/institute_crm_menu.xml',
     ],
     'installable': True,
     'application': False,
