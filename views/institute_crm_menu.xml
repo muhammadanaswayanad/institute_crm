@@ -15,16 +15,10 @@
               action="utm.utm_source_action"
               sequence="15"/>
 
-    <!-- Reporting Menu -->
-    <menuitem id="menu_crm_reporting"
-              name="Reporting"
-              parent="crm.crm_menu_root"
-              sequence="5"/>
-    
     <!-- Admission Officer Performance Report -->
     <menuitem id="menu_crm_admission_officer_report"
               name="Admission Officer Performance"
-              parent="menu_crm_reporting"
+              parent="crm.crm_menu_report"
               action="institute_crm.action_crm_lead_report_institute"
               sequence="10"/>
 
