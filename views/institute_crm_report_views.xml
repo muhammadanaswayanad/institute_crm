@@ -29,13 +29,13 @@
                         <button name="action_view_all_leads" type="object" class="oe_stat_button" icon="fa-users">
                             <field name="total_count" widget="statinfo" string="Total Leads"/>
                         </button>
-                        <button name="action_view_overdue_leads" type="object" class="oe_stat_button" icon="fa-exclamation-triangle" attrs="{'invisible': [('overdue_count', '=', 0)]}">
+                        <button name="action_view_overdue_leads" type="object" class="oe_stat_button" icon="fa-exclamation-triangle" invisible="overdue_count == 0">
                             <field name="overdue_count" widget="statinfo" string="Overdue"/>
                         </button>
-                        <button name="action_view_due_leads" type="object" class="oe_stat_button" icon="fa-clock-o" attrs="{'invisible': [('due_count', '=', 0)]}">
+                        <button name="action_view_due_leads" type="object" class="oe_stat_button" icon="fa-clock-o" invisible="due_count == 0">
                             <field name="due_count" widget="statinfo" string="Due"/>
                         </button>
-                        <button name="action_view_active_leads" type="object" class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('active_count', '=', 0)]}">
+                        <button name="action_view_active_leads" type="object" class="oe_stat_button" icon="fa-check-circle" invisible="active_count == 0">
                             <field name="active_count" widget="statinfo" string="Active"/>
                         </button>
                     </div>
