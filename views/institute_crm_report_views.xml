@@ -8,8 +8,8 @@
         <field name="arch" type="xml">
             <tree string="Admission Officer Performance" create="false" delete="false" edit="false">
                 <field name="user_id" string="Admission Officer"/>
-                <field name="overdue_count" string="Overdue" sum="Total Overdue"/>
-                <field name="due_count" string="Due" sum="Total Due"/>
+                <field name="overdue_count" string="Overdue" sum="Total Overdue" widget="statinfo"/>
+                <field name="due_count" string="Due" sum="Total Due" widget="statinfo"/>
                 <field name="active_count" string="Active" sum="Total Active"/>
                 <field name="won_count" string="Won" sum="Total Won"/>
                 <field name="lost_count" string="Lost" sum="Total Lost"/>
@@ -17,6 +17,46 @@
             </tree>
         </field>
     </record>
+
+    <!-- Form View for Report -->
+    <record id="view_crm_lead_report_institute_form" model="ir.ui.view">
+        <field name="name">crm.lead.report.institute.form</field>
+        <field name="model">crm.lead.report.institute</field>
+        <field name="arch" type="xml">
+            <form string="Admission Officer Performance" create="false" delete="false" edit="false">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_all_leads" type="object" class="oe_stat_button" icon="fa-users">
+                            <field name="total_count" widget="statinfo" string="Total Leads"/>
+                        </button>
+                        <button name="action_view_overdue_leads" type="object" class="oe_stat_button" icon="fa-exclamation-triangle" attrs="{'invisible': [('overdue_count', '=', 0)]}">
+                            <field name="overdue_count" widget="statinfo" string="Overdue"/>
+                        </button>
+                        <button name="action_view_due_leads" type="object" class="oe_stat_button" icon="fa-clock-o" attrs="{'invisible': [('due_count', '=', 0)]}">
+                            <field name="due_count" widget="statinfo" string="Due"/>
+                        </button>
+                        <button name="action_view_active_leads" type="object" class="oe_stat_button" icon="fa-check-circle" attrs="{'invisible': [('active_count', '=', 0)]}">
+                            <field name="active_count" widget="statinfo" string="Active"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="user_id" string="Admission Officer"/>
+                            <field name="total_count" string="Total Leads"/>
+                        </group>
+                        <group>
+                            <field name="overdue_count" string="Overdue Leads"/>
+                            <field name="due_count" string="Due Leads"/>
+                            <field name="active_count" string="Active Leads"/>
+                            <field name="won_count" string="Won Leads"/>
+                            <field name="lost_count" string="Lost Leads"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
 
     <!-- Pivot View for Report -->
     <record id="view_crm_lead_report_institute_pivot" model="ir.ui.view">
@@ -69,7 +109,7 @@
     <record id="action_crm_lead_report_institute" model="ir.actions.act_window">
         <field name="name">Admission Officer Performance</field>
         <field name="res_model">crm.lead.report.institute</field>
-        <field name="view_mode">tree,pivot,graph</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
         <field name="search_view_id" ref="view_crm_lead_report_institute_search"/>
         <field name="context">{}</field>
         <field name="help" type="html">

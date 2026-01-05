@@ -63,3 +63,80 @@ class CrmLeadReportInstitute(models.Model):
             )
         """ % self._table
         self.env.cr.execute(query)
+
+    def action_view_all_leads(self):
+        """Open all leads for this admission officer"""
+        self.ensure_one()
+        return {
+            'name': f'All Leads - {self.user_id.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'crm.lead',
+            'view_mode': 'tree,kanban,form,calendar,graph,activity',
+            'domain': [('user_id', '=', self.user_id.id)],
+            'context': {
+                'default_user_id': self.user_id.id,
+                'search_default_user_id': self.user_id.id,
+            }
+        }
+
+    def action_view_overdue_leads(self):
+        """Open overdue leads for this admission officer"""
+        self.ensure_one()
+        today = fields.Date.today()
+        return {
+            'name': f'Overdue Leads - {self.user_id.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'crm.lead',
+            'view_mode': 'tree,kanban,form,calendar,activity',
+            'domain': [
+                ('user_id', '=', self.user_id.id),
+                ('date_deadline', '<', today),
+                ('active', '=', True),
+                ('probability', '<', 100),
+                ('probability', '>=', 0),
+            ],
+            'context': {
+                'default_user_id': self.user_id.id,
+            }
+        }
+
+    def action_view_due_leads(self):
+        """Open due leads for this admission officer"""
+        self.ensure_one()
+        today = fields.Date.today()
+        return {
+            'name': f'Due Leads - {self.user_id.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'crm.lead',
+            'view_mode': 'tree,kanban,form,calendar,activity',
+            'domain': [
+                ('user_id', '=', self.user_id.id),
+                ('date_deadline', '>=', today),
+                ('active', '=', True),
+                ('probability', '<', 100),
+                ('probability', '>=', 0),
+            ],
+            'context': {
+                'default_user_id': self.user_id.id,
+            }
+        }
+
+    def action_view_active_leads(self):
+        """Open active leads for this admission officer"""
+        self.ensure_one()
+        return {
+            'name': f'Active Leads - {self.user_id.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'crm.lead',
+            'view_mode': 'tree,kanban,form,calendar,activity',
+            'domain': [
+                ('user_id', '=', self.user_id.id),
+                ('active', '=', True),
+                ('probability', '<', 100),
+                ('probability', '>=', 0),
+            ],
+            'context': {
+                'default_user_id': self.user_id.id,
+            }
+        }
+
