@@ -8,8 +8,8 @@
         <field name="arch" type="xml">
             <tree string="Admission Officer Performance" create="false" delete="false" edit="false">
                 <field name="user_id" string="Admission Officer"/>
-                <field name="overdue_count" string="Overdue" sum="Total Overdue" widget="statinfo"/>
-                <field name="due_count" string="Due" sum="Total Due" widget="statinfo"/>
+                <field name="overdue_count" string="Overdue" sum="Total Overdue"/>
+                <field name="due_count" string="Due" sum="Total Due"/>
                 <field name="active_count" string="Active" sum="Total Active"/>
                 <field name="won_count" string="Won" sum="Total Won"/>
                 <field name="lost_count" string="Lost" sum="Total Lost"/>
