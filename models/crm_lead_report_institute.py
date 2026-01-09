@@ -33,38 +33,45 @@ class CrmLeadReportInstitute(models.Model):
                 SELECT 
                     ROW_NUMBER() OVER (ORDER BY user_id) as id,
                     user_id,
-                    COUNT(*) as total_count,
-                    COUNT(*) FILTER (
-                        WHERE date_deadline < CURRENT_DATE 
-                        AND active = true 
-                        AND probability < 100
-                        AND probability >= 0
-                    ) as overdue_count,
-                    COUNT(*) FILTER (
-                        WHERE date_deadline = CURRENT_DATE 
-                        AND active = true 
-                        AND probability < 100
-                        AND probability >= 0
-                    ) as today_count,
-                    COUNT(*) FILTER (
-                        WHERE date_deadline > CURRENT_DATE 
-                        AND active = true 
-                        AND probability < 100
-                        AND probability >= 0
-                    ) as scheduled_count,
-                    COUNT(*) FILTER (
-                        WHERE active = true 
-                        AND probability < 100
-                        AND probability >= 0
-                    ) as active_count,
-                    COUNT(*) FILTER (WHERE probability = 100) as won_count,
-                    COUNT(*) FILTER (WHERE probability = 0 AND active = false) as lost_count,
-                    MAX(date_deadline) as date_deadline,
+                    COUNT(DISTINCT lead_id) as total_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN activity_date < CURRENT_DATE THEN lead_id 
+                    END) as overdue_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN activity_date = CURRENT_DATE THEN lead_id 
+                    END) as today_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN activity_date > CURRENT_DATE THEN lead_id 
+                    END) as scheduled_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN active = true AND probability < 100 AND probability >= 0 
+                        THEN lead_id 
+                    END) as active_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN probability = 100 THEN lead_id 
+                    END) as won_count,
+                    COUNT(DISTINCT CASE 
+                        WHEN probability = 0 AND active = false THEN lead_id 
+                    END) as lost_count,
+                    MAX(activity_date) as date_deadline,
                     MAX(create_date) as create_date
-                FROM 
-                    crm_lead
-                WHERE 
-                    user_id IS NOT NULL
+                FROM (
+                    SELECT 
+                        l.id as lead_id,
+                        l.user_id,
+                        l.active,
+                        l.probability,
+                        l.create_date,
+                        a.date_deadline as activity_date
+                    FROM 
+                        crm_lead l
+                    LEFT JOIN 
+                        mail_activity a ON a.res_id = l.id 
+                        AND a.res_model = 'crm.lead'
+                        AND a.user_id = l.user_id
+                    WHERE 
+                        l.user_id IS NOT NULL
+                ) as lead_activities
                 GROUP BY 
                     user_id
             )
@@ -90,17 +97,16 @@ class CrmLeadReportInstitute(models.Model):
         """Open overdue leads for this admission officer"""
         self.ensure_one()
         today = fields.Date.today()
+        # Get leads with activities that are overdue
         return {
-            'name': f'Overdue Leads - {self.user_id.name}',
+            'name': f'Overdue Activities - {self.user_id.name}',
             'type': 'ir.actions.act_window',
             'res_model': 'crm.lead',
             'view_mode': 'tree,kanban,form,calendar,activity',
             'domain': [
                 ('user_id', '=', self.user_id.id),
-                ('date_deadline', '<', today),
-                ('active', '=', True),
-                ('probability', '<', 100),
-                ('probability', '>=', 0),
+                ('activity_ids.date_deadline', '<', today),
+                ('activity_ids.user_id', '=', self.user_id.id),
             ],
             'context': {
                 'default_user_id': self.user_id.id,
@@ -111,17 +117,16 @@ class CrmLeadReportInstitute(models.Model):
         """Open today's leads for this admission officer"""
         self.ensure_one()
         today = fields.Date.today()
+        # Get leads with activities due today
         return {
-            'name': f"Today's Leads - {self.user_id.name}",
+            'name': f"Today's Activities - {self.user_id.name}",
             'type': 'ir.actions.act_window',
             'res_model': 'crm.lead',
             'view_mode': 'tree,kanban,form,calendar,activity',
             'domain': [
                 ('user_id', '=', self.user_id.id),
-                ('date_deadline', '=', today),
-                ('active', '=', True),
-                ('probability', '<', 100),
-                ('probability', '>=', 0),
+                ('activity_ids.date_deadline', '=', today),
+                ('activity_ids.user_id', '=', self.user_id.id),
             ],
             'context': {
                 'default_user_id': self.user_id.id,
@@ -132,17 +137,16 @@ class CrmLeadReportInstitute(models.Model):
         """Open scheduled (future) leads for this admission officer"""
         self.ensure_one()
         today = fields.Date.today()
+        # Get leads with activities scheduled for future
         return {
-            'name': f'Scheduled Leads - {self.user_id.name}',
+            'name': f'Scheduled Activities - {self.user_id.name}',
             'type': 'ir.actions.act_window',
             'res_model': 'crm.lead',
             'view_mode': 'tree,kanban,form,calendar,activity',
             'domain': [
                 ('user_id', '=', self.user_id.id),
-                ('date_deadline', '>', today),
-                ('active', '=', True),
-                ('probability', '<', 100),
-                ('probability', '>=', 0),
+                ('activity_ids.date_deadline', '>', today),
+                ('activity_ids.user_id', '=', self.user_id.id),
             ],
             'context': {
                 'default_user_id': self.user_id.id,
