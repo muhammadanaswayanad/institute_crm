@@ -131,4 +131,44 @@
         </field>
     </record>
 
+    <!-- Calendar View for Activities -->
+    <record id="view_crm_activity_calendar" model="ir.ui.view">
+        <field name="name">crm.activity.calendar</field>
+        <field name="model">mail.activity</field>
+        <field name="arch" type="xml">
+            <calendar string="Activities Calendar" 
+                      date_start="date_deadline" 
+                      color="user_id"
+                      mode="month"
+                      event_open_popup="true"
+                      quick_create="false">
+                <field name="res_name"/>
+                <field name="user_id" filters="1" avatar_field="avatar_128"/>
+                <field name="activity_type_id"/>
+                <field name="summary"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Action for Activities Calendar -->
+    <record id="action_crm_activities_calendar" model="ir.actions.act_window">
+        <field name="name">Activities Calendar</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">calendar,tree,form</field>
+        <field name="view_id" ref="view_crm_activity_calendar"/>
+        <field name="domain">[('res_model', '=', 'crm.lead')]</field>
+        <field name="context">{
+            'default_res_model': 'crm.lead',
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No activities scheduled yet
+            </p>
+            <p>
+                This calendar shows all CRM activities color-coded by admission officer.
+                Use the filters on the right to show/hide specific officers.
+            </p>
+        </field>
+    </record>
+
 </odoo>

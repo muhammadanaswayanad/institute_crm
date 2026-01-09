@@ -25,6 +25,22 @@ class CrmLeadReportInstitute(models.Model):
     date_deadline = fields.Date(string='Deadline', readonly=True)
     create_date = fields.Datetime(string='Created On', readonly=True)
 
+    def action_view_calendar(self):
+        """Open calendar view showing all activities"""
+        return {
+            'name': 'Activities Calendar',
+            'type': 'ir.actions.act_window',
+            'res_model': 'mail.activity',
+            'view_mode': 'calendar,tree,form',
+            'domain': [
+                ('res_model', '=', 'crm.lead'),
+                ('user_id', 'in', self.env['crm.lead'].search([]).mapped('user_id').ids),
+            ],
+            'context': {
+                'default_res_model': 'crm.lead',
+            }
+        }
+
     def init(self):
         """Initialize the SQL view for the report"""
         tools.drop_view_if_exists(self.env.cr, self._table)

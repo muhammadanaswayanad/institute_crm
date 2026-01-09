@@ -23,4 +23,12 @@
               groups="sales_team.group_sale_manager"
               sequence="10"/>
 
+    <!-- Activities Calendar -->
+    <menuitem id="menu_crm_activities_calendar"
+              name="Activities Calendar"
+              parent="crm.crm_menu_report"
+              action="institute_crm.action_crm_activities_calendar"
+              groups="sales_team.group_sale_manager"
+              sequence="11"/>
+
 </odoo>
