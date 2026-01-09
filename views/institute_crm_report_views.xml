@@ -7,6 +7,13 @@
         <field name="model">crm.lead.report.institute</field>
         <field name="arch" type="xml">
             <tree string="Admission Officer Performance" create="false" delete="false" edit="false">
+                <header>
+                    <button name="%(action_crm_activities_calendar)d" 
+                            type="action" 
+                            string="View Calendar" 
+                            class="btn-primary"
+                            icon="fa-calendar"/>
+                </header>
                 <field name="user_id" string="Admission Officer"/>
                 <field name="overdue_count" string="Overdue" sum="Total Overdue"/>
                 <field name="today_count" string="Today's Activity" sum="Total Today"/>
