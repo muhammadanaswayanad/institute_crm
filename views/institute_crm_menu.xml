@@ -20,6 +20,7 @@
               name="Admission Officer Performance"
               parent="crm.crm_menu_report"
               action="institute_crm.action_crm_lead_report_institute"
+              groups="sales_team.group_sale_manager"
               sequence="10"/>
 
 </odoo>
