@@ -13,8 +13,9 @@ class CrmLeadReportInstitute(models.Model):
 
     # Fields
     user_id = fields.Many2one('res.users', string='Admission Officer', readonly=True)
-    overdue_count = fields.Integer(string='Overdue', readonly=True, help='Number of leads with past deadline')
-    due_count = fields.Integer(string='Due', readonly=True, help='Number of leads with upcoming or today deadline')
+    overdue_count = fields.Integer(string='Overdue', readonly=True, help='Number of leads with past deadline (pending/unattended)')
+    today_count = fields.Integer(string="Today's Activity", readonly=True, help='Number of leads with deadline today')
+    scheduled_count = fields.Integer(string='Scheduled', readonly=True, help='Number of leads with future deadline')
     total_count = fields.Integer(string='Total Leads', readonly=True, help='Total number of assigned leads')
     active_count = fields.Integer(string='Active Leads', readonly=True, help='Leads not won or lost')
     won_count = fields.Integer(string='Won', readonly=True, help='Number of won leads')
@@ -40,11 +41,17 @@ class CrmLeadReportInstitute(models.Model):
                         AND probability >= 0
                     ) as overdue_count,
                     COUNT(*) FILTER (
-                        WHERE date_deadline >= CURRENT_DATE 
+                        WHERE date_deadline = CURRENT_DATE 
                         AND active = true 
                         AND probability < 100
                         AND probability >= 0
-                    ) as due_count,
+                    ) as today_count,
+                    COUNT(*) FILTER (
+                        WHERE date_deadline > CURRENT_DATE 
+                        AND active = true 
+                        AND probability < 100
+                        AND probability >= 0
+                    ) as scheduled_count,
                     COUNT(*) FILTER (
                         WHERE active = true 
                         AND probability < 100
@@ -100,18 +107,39 @@ class CrmLeadReportInstitute(models.Model):
             }
         }
 
-    def action_view_due_leads(self):
-        """Open due leads for this admission officer"""
+    def action_view_today_leads(self):
+        """Open today's leads for this admission officer"""
         self.ensure_one()
         today = fields.Date.today()
         return {
-            'name': f'Due Leads - {self.user_id.name}',
+            'name': f"Today's Leads - {self.user_id.name}",
             'type': 'ir.actions.act_window',
             'res_model': 'crm.lead',
             'view_mode': 'tree,kanban,form,calendar,activity',
             'domain': [
                 ('user_id', '=', self.user_id.id),
-                ('date_deadline', '>=', today),
+                ('date_deadline', '=', today),
+                ('active', '=', True),
+                ('probability', '<', 100),
+                ('probability', '>=', 0),
+            ],
+            'context': {
+                'default_user_id': self.user_id.id,
+            }
+        }
+
+    def action_view_scheduled_leads(self):
+        """Open scheduled (future) leads for this admission officer"""
+        self.ensure_one()
+        today = fields.Date.today()
+        return {
+            'name': f'Scheduled Leads - {self.user_id.name}',
+            'type': 'ir.actions.act_window',
+            'res_model': 'crm.lead',
+            'view_mode': 'tree,kanban,form,calendar,activity',
+            'domain': [
+                ('user_id', '=', self.user_id.id),
+                ('date_deadline', '>', today),
                 ('active', '=', True),
                 ('probability', '<', 100),
                 ('probability', '>=', 0),

@@ -9,7 +9,8 @@
             <tree string="Admission Officer Performance" create="false" delete="false" edit="false">
                 <field name="user_id" string="Admission Officer"/>
                 <field name="overdue_count" string="Overdue" sum="Total Overdue"/>
-                <field name="due_count" string="Due" sum="Total Due"/>
+                <field name="today_count" string="Today's Activity" sum="Total Today"/>
+                <field name="scheduled_count" string="Scheduled" sum="Total Scheduled"/>
                 <field name="active_count" string="Active" sum="Total Active"/>
                 <field name="won_count" string="Won" sum="Total Won"/>
                 <field name="lost_count" string="Lost" sum="Total Lost"/>
@@ -32,8 +33,11 @@
                         <button name="action_view_overdue_leads" type="object" class="oe_stat_button" icon="fa-exclamation-triangle" invisible="overdue_count == 0">
                             <field name="overdue_count" widget="statinfo" string="Overdue"/>
                         </button>
-                        <button name="action_view_due_leads" type="object" class="oe_stat_button" icon="fa-clock-o" invisible="due_count == 0">
-                            <field name="due_count" widget="statinfo" string="Due"/>
+                        <button name="action_view_today_leads" type="object" class="oe_stat_button" icon="fa-calendar-check-o" invisible="today_count == 0">
+                            <field name="today_count" widget="statinfo" string="Today"/>
+                        </button>
+                        <button name="action_view_scheduled_leads" type="object" class="oe_stat_button" icon="fa-clock-o" invisible="scheduled_count == 0">
+                            <field name="scheduled_count" widget="statinfo" string="Scheduled"/>
                         </button>
                         <button name="action_view_active_leads" type="object" class="oe_stat_button" icon="fa-check-circle" invisible="active_count == 0">
                             <field name="active_count" widget="statinfo" string="Active"/>
@@ -46,7 +50,8 @@
                         </group>
                         <group>
                             <field name="overdue_count" string="Overdue Leads"/>
-                            <field name="due_count" string="Due Leads"/>
+                            <field name="today_count" string="Today's Activity"/>
+                            <field name="scheduled_count" string="Scheduled Leads"/>
                             <field name="active_count" string="Active Leads"/>
                             <field name="won_count" string="Won Leads"/>
                             <field name="lost_count" string="Lost Leads"/>
@@ -66,7 +71,8 @@
             <pivot string="Admission Officer Analysis" display_quantity="true">
                 <field name="user_id" type="row"/>
                 <field name="overdue_count" type="measure"/>
-                <field name="due_count" type="measure"/>
+                <field name="today_count" type="measure"/>
+                <field name="scheduled_count" type="measure"/>
                 <field name="active_count" type="measure"/>
                 <field name="won_count" type="measure"/>
                 <field name="lost_count" type="measure"/>
@@ -83,7 +89,8 @@
             <graph string="Admission Officer Performance" type="bar" stacked="True">
                 <field name="user_id"/>
                 <field name="overdue_count" type="measure"/>
-                <field name="due_count" type="measure"/>
+                <field name="today_count" type="measure"/>
+                <field name="scheduled_count" type="measure"/>
             </graph>
         </field>
     </record>
@@ -96,7 +103,8 @@
             <search string="Search Admission Officer Report">
                 <field name="user_id" string="Admission Officer"/>
                 <filter string="Has Overdue" name="has_overdue" domain="[('overdue_count', '>', 0)]"/>
-                <filter string="Has Due" name="has_due" domain="[('due_count', '>', 0)]"/>
+                <filter string="Has Today's Activity" name="has_today" domain="[('today_count', '>', 0)]"/>
+                <filter string="Has Scheduled" name="has_scheduled" domain="[('scheduled_count', '>', 0)]"/>
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Admission Officer" name="group_user" context="{'group_by': 'user_id'}"/>
