@@ -26,7 +26,6 @@
         'security/ir.model.access.csv',
         # 'data/crm_stage_data.xml',  # Commented out to prevent duplicate stages on upgrade
         'data/crm_actions.xml',
-        'data/institute_crm_server_actions.xml',
         'views/institute_crm_views.xml',
         'views/institute_crm_report_views.xml',
         'views/institute_crm_menu.xml',
