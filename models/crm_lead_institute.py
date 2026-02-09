@@ -219,9 +219,11 @@ class CrmLeadInstitute(models.Model):
         if self.mobile:
             self.alternative_phone = self.mobile
 
+
+
     @api.model_create_multi
     def create(self, vals_list):
-        """Override create to sync fields"""
+        """Override create to sync fields and schedule activity"""
         for vals in vals_list:
             # Sync student_name with contact_name for contact creation
             if vals.get('student_name') and not vals.get('contact_name'):
@@ -232,10 +234,16 @@ class CrmLeadInstitute(models.Model):
             # Sync alternative_phone with mobile
             if vals.get('alternative_phone') and not vals.get('mobile'):
                 vals['mobile'] = vals['alternative_phone']
-        return super().create(vals_list)
+        
+        leads = super().create(vals_list)
+        
+        for lead in leads:
+            if lead.user_id:
+                lead._schedule_salesperson_activity(lead.user_id)
+        return leads
 
     def write(self, vals):
-        """Override write to sync fields"""
+        """Override write to sync fields and schedule activity"""
         # Sync student_name to partner
         if vals.get('student_name') and self.partner_id:
             self.partner_id.name = vals['student_name']
@@ -255,4 +263,27 @@ class CrmLeadInstitute(models.Model):
         # Sync mobile to alternative_phone
         if vals.get('mobile') and not vals.get('alternative_phone'):
             vals['alternative_phone'] = vals['mobile']
-        return super().write(vals)
+
+        # Capture user_id change for activity scheduling
+        user_id_changed = 'user_id' in vals
+        
+        res = super().write(vals)
+        
+        if user_id_changed and vals.get('user_id'):
+            # Schedule activity for the new salesperson
+            new_user = self.env['res.users'].browse(vals['user_id'])
+            for lead in self:
+                lead._schedule_salesperson_activity(new_user)
+        return res
+
+    def _schedule_salesperson_activity(self, user):
+        """Schedule a call activity for the salesperson for the next day"""
+        for lead in self:
+            date_deadline = fields.Date.today() + datetime.timedelta(days=1)
+            # Use existing activity_schedule method from mail.thread
+            lead.activity_schedule(
+                'mail.mail_activity_data_call',
+                user_id=user.id,
+                date_deadline=date_deadline,
+                summary='Follow-up Call (New Assignment)'
+            )

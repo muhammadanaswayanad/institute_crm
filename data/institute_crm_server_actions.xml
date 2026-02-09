@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_schedule_call_new_leads" model="ir.actions.server">
+            <field name="name">Schedule Call for 10-02-2026</field>
+            <field name="model_id" ref="crm.model_crm_lead"/>
+            <field name="binding_model_id" ref="crm.model_crm_lead"/>
+            <field name="binding_view_types">list,form</field>
+            <field name="state">code</field>
+            <field name="code">
+# Filter for leads in 'New' stage (adjust stage name if needed)
+# Assumption: 'New' is the name of the stage.
+# If running on selected records, 'records' is the selection.
+
+target_leads = records.filtered(lambda l: l.stage_id.name == 'New' and l.user_id)
+
+activity_type = env.ref('mail.mail_activity_data_call', raise_if_not_found=False)
+if not activity_type:
+    # Fallback if XML ID not found, search by name or create default
+    activity_type = env['mail.activity.type'].search([('name', '=', 'Call')], limit=1)
+
+if activity_type:
+    for lead in target_leads:
+        # Check if activity already exists for this date/user/type to avoid duplicates?
+        # Requirement doesn't specify, but good practice.
+        # However, "an action will work" implies simple force creation. 
+        # I will just schedule it.
+        
+        lead.activity_schedule(
+            'mail.mail_activity_data_call',
+            user_id=lead.user_id.id,
+            date_deadline=datetime.date(2026, 2, 10),
+            summary='Scheduled Call (Retroactive)'
+        )
+            </field>
+        </record>
+    </data>
+</odoo>
