@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 import datetime
+import re
 
 
 class CrmLeadInstitute(models.Model):
@@ -288,3 +290,60 @@ class CrmLeadInstitute(models.Model):
                 date_deadline=date_deadline,
                 summary='Follow-up Call (New Assignment)'
             )
+
+    @api.constrains('phone', 'mobile', 'student_phone', 'alternative_phone', 'type', 'active')
+    def _check_duplicate_phones(self):
+        """Check for duplicate phone numbers across leads and opportunities"""
+        for record in self:
+            if not record.active:
+                continue
+
+            # Gather all numbers to check
+            numbers = []
+            if record.phone: numbers.append(record.phone)
+            if record.mobile: numbers.append(record.mobile)
+            if record.student_phone: numbers.append(record.student_phone)
+            if record.alternative_phone: numbers.append(record.alternative_phone)
+
+            check_digits = set()
+            for num in numbers:
+                # Extract only digits
+                digits = re.sub(r'\D', '', num)
+                if len(digits) >= 10:
+                    check_digits.add(digits[-10:])
+                elif len(digits) > 5:  # Arbitrary min length if less than 10 digits
+                    check_digits.add(digits)
+
+            if not check_digits:
+                continue
+
+            for digits in check_digits:
+                # Use SQL REGEXP_REPLACE to strip non-digits from db fields and compare rightmost chars
+                # This ensures we handle spaces, +91, dashes existing in the database as well
+                self.env.cr.execute(r"""
+                    SELECT id, name, type FROM crm_lead 
+                    WHERE id != %s 
+                    AND active = true
+                    AND (
+                        REGEXP_REPLACE(phone, '\D', '', 'g') LIKE %s OR 
+                        REGEXP_REPLACE(mobile, '\D', '', 'g') LIKE %s OR
+                        REGEXP_REPLACE(student_phone, '\D', '', 'g') LIKE %s OR
+                        REGEXP_REPLACE(alternative_phone, '\D', '', 'g') LIKE %s
+                    )
+                    LIMIT 1
+                """, (
+                    record.id, 
+                    f'%{digits}', 
+                    f'%{digits}', 
+                    f'%{digits}', 
+                    f'%{digits}'
+                ))
+                
+                res = self.env.cr.fetchone()
+                if res:
+                    dup_id, dup_name, dup_type = res
+                    record_type = "Opportunity" if dup_type == 'opportunity' else "Lead"
+                    raise ValidationError(
+                        f"Duplicate Prevention: A {record_type} with this phone number already exists!\n"
+                        f"Existing Record: {dup_name}"
+                    )
