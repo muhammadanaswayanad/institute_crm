@@ -29,6 +29,7 @@
         'views/institute_crm_views.xml',
         'views/institute_crm_report_views.xml',
         'views/admission_report_wizard_views.xml',
+        'report/campus_admission_report.xml',
         'views/institute_crm_menu.xml',
     ],
     'installable': True,

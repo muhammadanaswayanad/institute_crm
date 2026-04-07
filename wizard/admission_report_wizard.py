@@ -8,6 +8,7 @@ class AdmissionReportWizard(models.TransientModel):
 
     date_from = fields.Date(string='From Date', required=True)
     date_to = fields.Date(string='To Date', required=True, default=fields.Date.context_today)
+    branch_id = fields.Many2one('student.branch', string='Campus')
     report_type = fields.Selection([
         ('college', 'College Wise Admission'),
         ('course', 'Course Wise Admission'),
@@ -42,10 +43,7 @@ class AdmissionReportWizard(models.TransientModel):
         ]
         
         if self.report_type == 'college':
-            group_by_field = 'admitted_campus'
-            group_by_list = ['admitted_campus', 'course_interested', 'batch_id']
-            name = 'Campus Wise Admission'
-            measures = ['__count__', 'batch_target']
+            return self.env.ref('institute_crm.action_report_campus_wise_admission').report_action(self)
         elif self.report_type == 'course':
             group_by_field = 'course_interested'
             group_by_list = ['course_interested']

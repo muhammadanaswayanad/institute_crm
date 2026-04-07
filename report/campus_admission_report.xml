@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_campus_wise_admission" model="ir.actions.report">
+        <field name="name">Campus Wise Admission Report</field>
+        <field name="model">institute.admission.report.wizard</field>
+        <field name="report_type">qweb-html</field> 
+        <field name="report_name">institute_crm.report_campus_wise</field>
+        <field name="report_file">institute_crm.report_campus_wise</field>
+    </record>
+
+    <template id="report_campus_wise">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <t t-foreach="campus_data.items()" t-as="campus_tuple">
+                            <t t-set="campus" t-value="campus_tuple[0]"/>
+                            <t t-set="courses" t-value="campus_tuple[1]"/>
+                            
+                            <h2 class="text-center" style="background-color: #e6f0ff; padding: 10px; margin-bottom: 0;"><t t-esc="campus.upper()"/></h2>
+                            
+                            <table class="table table-bordered table-sm" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background-color: #b3c6ff;">
+                                        <th class="text-center">SNO.</th>
+                                        <th class="text-left">COURSE</th>
+                                        <th class="text-center">BATCH</th>
+                                        <th class="text-center">TARGET</th>
+                                        <th class="text-center">ACHIEVED</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-set="sno" t-value="1"/>
+                                    <t t-set="total_target" t-value="0"/>
+                                    <t t-set="total_achieved" t-value="0"/>
+                                    
+                                    <t t-foreach="courses.items()" t-as="course_tuple">
+                                        <t t-set="course_name" t-value="course_tuple[0]"/>
+                                        <t t-set="batches" t-value="course_tuple[1]"/>
+                                        <t t-set="rowspan" t-value="len(batches)"/>
+                                        
+                                        <t t-set="first_batch" t-value="True"/>
+                                        <t t-foreach="batches" t-as="batch">
+                                            <tr>
+                                                <t t-if="first_batch">
+                                                    <td t-att-rowspan="rowspan" class="text-center align-middle"><t t-esc="sno"/></td>
+                                                    <td t-att-rowspan="rowspan" class="text-center align-middle"><t t-esc="course_name"/></td>
+                                                    <t t-set="sno" t-value="sno + 1"/>
+                                                    <t t-set="first_batch" t-value="False"/>
+                                                </t>
+                                                
+                                                <td class="text-center"><t t-esc="batch['batch_name']"/></td>
+                                                <td class="text-center"><t t-esc="batch['target']"/></td>
+                                                <td class="text-center"><t t-esc="batch['achieved']"/></td>
+                                                
+                                                <t t-set="total_target" t-value="total_target + batch['target']"/>
+                                                <t t-set="total_achieved" t-value="total_achieved + batch['achieved']"/>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                    
+                                    <tr style="background-color: #799af3; color: white; font-weight: bold;">
+                                        <td colspan="3" class="text-center">TOTAL</td>
+                                        <td class="text-center"><t t-esc="total_target"/></td>
+                                        <td class="text-center"><t t-esc="total_achieved"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <br/>
+                        </t>
+                        
+                        <t t-if="not campus_data">
+                            <div class="alert alert-info mt-3">
+                                No admission data found for the selected criteria.
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

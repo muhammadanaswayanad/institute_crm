@@ -13,6 +13,7 @@
                     </group>
                     <group>
                         <field name="report_type"/>
+                        <field name="branch_id" invisible="report_type != 'college'"/>
                     </group>
                 </group>
                 <footer>
