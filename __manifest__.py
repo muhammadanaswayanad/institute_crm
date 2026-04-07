@@ -28,6 +28,7 @@
         'data/crm_actions.xml',
         'views/institute_crm_views.xml',
         'views/institute_crm_report_views.xml',
+        'views/admission_report_wizard_views.xml',
         'views/institute_crm_menu.xml',
     ],
     'installable': True,

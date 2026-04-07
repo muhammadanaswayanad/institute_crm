@@ -3,3 +3,5 @@ access_crm_lead_user,crm.lead.user,crm.model_crm_lead,sales_team.group_sale_sale
 access_crm_lead_manager,crm.lead.manager,crm.model_crm_lead,sales_team.group_sale_salesman_all_leads,1,1,1,1
 access_crm_lead_report_institute_user,crm.lead.report.institute.user,model_crm_lead_report_institute,sales_team.group_sale_salesman,1,0,0,0
 access_crm_lead_report_institute_manager,crm.lead.report.institute.manager,model_crm_lead_report_institute,sales_team.group_sale_salesman_all_leads,1,0,0,0
+access_institute_admission_report_wizard_user,institute.admission.report.wizard.user,model_institute_admission_report_wizard,sales_team.group_sale_salesman,1,1,1,1
+access_institute_admission_report_wizard_manager,institute.admission.report.wizard.manager,model_institute_admission_report_wizard,sales_team.group_sale_salesman_all_leads,1,1,1,1

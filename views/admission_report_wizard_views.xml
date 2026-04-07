@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_institute_admission_report_wizard_form" model="ir.ui.view">
+        <field name="name">institute.admission.report.wizard.form</field>
+        <field name="model">institute.admission.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Admission Report">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="report_type"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_generate_report" string="View Report" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_college_wise_admission_report" model="ir.actions.act_window">
+        <field name="name">College Wise Admission Report</field>
+        <field name="res_model">institute.admission.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'college'}</field>
+    </record>
+
+    <record id="action_course_wise_admission_report" model="ir.actions.act_window">
+        <field name="name">Course Wise Admission Report</field>
+        <field name="res_model">institute.admission.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'course'}</field>
+    </record>
+
+    <record id="action_source_wise_admission_report" model="ir.actions.act_window">
+        <field name="name">Source Wise Admission Report</field>
+        <field name="res_model">institute.admission.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'source'}</field>
+    </record>
+
+</odoo>
