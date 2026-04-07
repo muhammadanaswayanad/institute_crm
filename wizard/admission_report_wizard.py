@@ -17,6 +17,20 @@ class AdmissionReportWizard(models.TransientModel):
     def action_generate_report(self):
         self.ensure_one()
         
+        # Populate missing admitted_campus data for existing "Won/Admitted" records
+        if 'student.student' in self.env:
+            empty_campus_leads = self.env['crm.lead'].search([
+                ('admitted_campus', '=', False),
+                ('probability', '=', 100)
+            ])
+            if empty_campus_leads:
+                students = self.env['student.student'].search([
+                    ('lead_id', 'in', empty_campus_leads.ids)
+                ])
+                for student in students:
+                    if student.branch and student.lead_id:
+                        student.lead_id.admitted_campus = student.branch.name
+        
         # Filter for Admitted / Won leads within the date range
         domain = [
             ('active', '=', True),
@@ -44,5 +58,7 @@ class AdmissionReportWizard(models.TransientModel):
             'context': {
                 'search_default_group_by_' + group_by_field: 1,
                 'group_by': [group_by_field],
+                'pivot_measures': ['__count__'],
+                'pivot_column_groupby': [], 
             }
         }
