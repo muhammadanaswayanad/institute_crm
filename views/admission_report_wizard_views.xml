@@ -23,28 +23,12 @@
         </field>
     </record>
 
-    <record id="action_college_wise_admission_report" model="ir.actions.act_window">
-        <field name="name">College Wise Admission Report</field>
+    <record id="action_admission_report" model="ir.actions.act_window">
+        <field name="name">Admission Report</field>
         <field name="res_model">institute.admission.report.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
-        <field name="context">{'default_report_type': 'college'}</field>
-    </record>
-
-    <record id="action_course_wise_admission_report" model="ir.actions.act_window">
-        <field name="name">Course Wise Admission Report</field>
-        <field name="res_model">institute.admission.report.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="context">{'default_report_type': 'course'}</field>
-    </record>
-
-    <record id="action_source_wise_admission_report" model="ir.actions.act_window">
-        <field name="name">Source Wise Admission Report</field>
-        <field name="res_model">institute.admission.report.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-        <field name="context">{'default_report_type': 'source'}</field>
+        <field name="context">{}</field>
     </record>
 
 </odoo>
