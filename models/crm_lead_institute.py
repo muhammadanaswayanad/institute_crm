@@ -75,6 +75,14 @@ class CrmLeadInstitute(models.Model):
         string='Admitted Campus',
         help='Campus name where the student was admitted'
     )
+    
+    batch_target = fields.Integer(
+        string='Batch Target',
+        related='batch_id.target_admission',
+        store=True,
+        group_operator='avg',
+        help='Target number of admissions for the selected batch'
+    )
 
     # No custom lead source - using standard source_id field from Odoo CRM
 

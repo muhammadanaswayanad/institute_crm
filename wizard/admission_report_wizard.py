@@ -12,6 +12,7 @@ class AdmissionReportWizard(models.TransientModel):
         ('college', 'College Wise Admission'),
         ('course', 'Course Wise Admission'),
         ('source', 'Source Wise Admission'),
+        ('batch', 'Batch Wise Admission'),
     ], string='Report Type', required=True, default='course')
 
     def action_generate_report(self):
@@ -42,12 +43,19 @@ class AdmissionReportWizard(models.TransientModel):
         if self.report_type == 'college':
             group_by_field = 'admitted_campus'
             name = 'Campus Wise Admission'
+            measures = ['__count__']
         elif self.report_type == 'course':
             group_by_field = 'course_interested'
             name = 'Course Wise Admission'
+            measures = ['__count__']
+        elif self.report_type == 'batch':
+            group_by_field = 'batch_id'
+            name = 'Batch Wise Admission'
+            measures = ['__count__', 'batch_target']
         else:
             group_by_field = 'source_id'
             name = 'Source Wise Admission'
+            measures = ['__count__']
             
         return {
             'name': name,
@@ -58,7 +66,7 @@ class AdmissionReportWizard(models.TransientModel):
             'context': {
                 'search_default_group_by_' + group_by_field: 1,
                 'group_by': [group_by_field],
-                'pivot_measures': ['__count__'],
+                'pivot_measures': measures,
                 'pivot_column_groupby': [], 
             }
         }

@@ -262,6 +262,7 @@
                     <filter string="Qualification" name="qualification" context="{'group_by': 'present_qualification'}"/>
                     <filter string="Follow-up Date" name="follow_up_date_group" context="{'group_by': 'follow_up_date'}"/>
                     <filter string="Admitted Campus" name="group_by_admitted_campus" context="{'group_by': 'admitted_campus'}"/>
+                    <filter string="Batch" name="group_by_batch_id" context="{'group_by': 'batch_id'}"/>
                 </group>
             </search>
         </field>
