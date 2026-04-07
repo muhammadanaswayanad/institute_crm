@@ -8,7 +8,6 @@ class AdmissionReportWizard(models.TransientModel):
 
     date_from = fields.Date(string='From Date', required=True)
     date_to = fields.Date(string='To Date', required=True, default=fields.Date.context_today)
-    branch_id = fields.Many2one('student.branch', string='Campus')
     report_type = fields.Selection([
         ('college', 'College Wise Admission'),
         ('course', 'Course Wise Admission'),
