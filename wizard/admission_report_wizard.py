@@ -43,22 +43,27 @@ class AdmissionReportWizard(models.TransientModel):
         
         if self.report_type == 'college':
             group_by_field = 'admitted_campus'
+            group_by_list = ['admitted_campus', 'course_interested', 'batch_id']
             name = 'Campus Wise Admission'
-            measures = ['__count__']
+            measures = ['__count__', 'batch_target']
         elif self.report_type == 'course':
             group_by_field = 'course_interested'
+            group_by_list = ['course_interested']
             name = 'Course Wise Admission'
             measures = ['__count__']
         elif self.report_type == 'batch':
             group_by_field = 'batch_id'
+            group_by_list = ['batch_id']
             name = 'Batch Wise Admission'
             measures = ['__count__', 'batch_target']
         elif self.report_type == 'officer':
             group_by_field = 'user_id'
+            group_by_list = ['user_id']
             name = 'Admission Officer Wise Admission'
             measures = ['__count__']
         else:
             group_by_field = 'source_id'
+            group_by_list = ['source_id']
             name = 'Source Wise Admission'
             measures = ['__count__']
             
@@ -74,7 +79,7 @@ class AdmissionReportWizard(models.TransientModel):
             'domain': domain,
             'context': {
                 'search_default_group_by_' + group_by_field: 1,
-                'group_by': [group_by_field],
+                'group_by': group_by_list,
                 'pivot_measures': measures,
                 'pivot_column_groupby': pivot_column_groupby, 
             }
