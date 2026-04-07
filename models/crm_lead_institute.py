@@ -70,6 +70,11 @@ class CrmLeadInstitute(models.Model):
         string='Joining Frequency',
         help='When the student plans to join (e.g., January 2024, Next semester)'
     )
+    
+    admitted_campus = fields.Char(
+        string='Admitted Campus',
+        help='Campus name where the student was admitted'
+    )
 
     # No custom lead source - using standard source_id field from Odoo CRM
 

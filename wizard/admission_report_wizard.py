@@ -26,8 +26,8 @@ class AdmissionReportWizard(models.TransientModel):
         ]
         
         if self.report_type == 'college':
-            group_by_field = 'admitted_branch_id'
-            name = 'College Wise Admission'
+            group_by_field = 'admitted_campus'
+            name = 'Campus Wise Admission'
         elif self.report_type == 'course':
             group_by_field = 'course_interested'
             name = 'Course Wise Admission'
