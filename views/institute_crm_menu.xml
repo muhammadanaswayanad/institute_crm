@@ -15,13 +15,6 @@
               action="utm.utm_source_action"
               sequence="15"/>
               
-    <!-- Add Batches menu safely bridging CRM with Student Batches -->
-    <menuitem id="menu_crm_batches"
-              name="Batches"
-              parent="crm.crm_menu_config"
-              action="student_management.action_student_batch"
-              sequence="30"/>
-
     <!-- Admission Officer Performance Report (includes calendar via smart button) -->
     <menuitem id="menu_crm_admission_officer_report"
               name="Admission Officer Performance"
