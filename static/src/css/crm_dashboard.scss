@@ -1,0 +1,50 @@
+.o_crm_custom_dashboard {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    
+    .bg-100 {
+        background-color: #f8f9fa;
+    }
+    
+    .o_card_stat {
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+    }
+    
+    .bg-gradient-brand {
+        background: linear-gradient(135deg, #714B67 0%, #017E84 100%);
+    }
+    
+    .list-group-item {
+        border-left: 0;
+        border-right: 0;
+        margin-bottom: 0;
+        border-radius: 0;
+        
+        &:first-child {
+            border-top: 0;
+        }
+        
+        &:hover {
+            background-color: #f8f9fa;
+        }
+    }
+    
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        
+        .card-header {
+            border-bottom: 2px solid #f8f9fa;
+        }
+    }
+
+    button.list-group-item {
+        border: none;
+        border-bottom: 1px solid rgba(0,0,0,0.125);
+    }
+}

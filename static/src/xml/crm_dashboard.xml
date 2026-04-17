@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="institute_crm.CrmDashboard" owl="1">
+        <div class="o_action_manager o_crm_custom_dashboard pb-5 overflow-auto bg-100">
+            <!-- Loading Indicator -->
+            <t t-if="state.isLoading">
+                <div class="d-flex w-100 h-100 align-items-center justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Dashboard Content -->
+            <t t-elif="state.data and !state.data.error">
+                <div class="container-fluid pt-4">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h1 class="display-6 fw-bold text-dark">
+                                <t t-if="state.data.is_manager">Manager Dashboard</t>
+                                <t t-else="">My Sales Dashboard</t>
+                            </h1>
+                            <p class="text-muted"><t t-esc="state.data.today"/></p>
+                        </div>
+                    </div>
+
+                    <!-- ADMIN / MANAGER VIEW -->
+                    <t t-if="state.data.is_manager">
+                        <div class="row g-4 mb-4">
+                            <!-- Overall Metrics -->
+                            <div class="col-md-4">
+                                <div class="card o_card_stat shadow-sm border-0 bg-primary text-white h-100" t-on-click="() => this.openConvertedLeads(true)">
+                                    <div class="card-body py-4 d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h2 class="display-5 fw-bold mb-0"><t t-esc="state.data.total_admissions"/></h2>
+                                            <p class="mb-0 fw-medium">Total Converted / Admissions</p>
+                                        </div>
+                                        <i class="fa fa-graduation-cap fa-fluid fa-3x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Salesperson Performance Table -->
+                            <div class="col-md-8">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                                        <h5 class="card-title fw-bold">Salesperson Performance</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless table-hover align-middle">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Salesperson</th>
+                                                        <th>Total Leads</th>
+                                                        <th>Converted Leads</th>
+                                                        <th class="text-danger">Win Rate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-foreach="state.data.salesperson_perf" t-as="perf" t-key="perf.user">
+                                                        <tr>
+                                                            <td class="fw-bold"><t t-esc="perf.user"/></td>
+                                                            <td><t t-esc="perf.total"/></td>
+                                                            <td class="text-success fw-bold"><t t-esc="perf.won"/></td>
+                                                            <td>
+                                                                <t t-if="perf.total > 0">
+                                                                    <t t-esc="Math.round((perf.won / perf.total) * 100)"/>%
+                                                                </t>
+                                                                <t t-else="">0%</t>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Team Activities -->
+                        <div class="row g-4 mb-4">
+                            <!-- Today Team Tasks -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
+                                        <h5 class="card-title fw-bold text-danger">Team Pending Today (<t t-esc="state.data.team_activities_today.length"/>)</h5>
+                                    </div>
+                                    <div class="card-body overflow-auto" style="max-height: 400px;">
+                                        <t t-if="state.data.team_activities_today.length > 0">
+                                            <div class="list-group list-group-flush">
+                                                <t t-foreach="state.data.team_activities_today" t-as="activity" t-key="activity.id">
+                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
+                                                        <div>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <span class="badge bg-danger rounded-pill"><t t-esc="activity.user_name"/></span>
+                                                        </div>
+                                                    </button>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <p class="text-muted text-center my-4">No team activities due today.</p>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Week Team Tasks -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
+                                        <h5 class="card-title fw-bold text-warning">Team Pending This Week (<t t-esc="state.data.team_activities_week.length"/>)</h5>
+                                    </div>
+                                    <div class="card-body overflow-auto" style="max-height: 400px;">
+                                        <t t-if="state.data.team_activities_week.length > 0">
+                                            <div class="list-group list-group-flush">
+                                                <t t-foreach="state.data.team_activities_week" t-as="activity" t-key="activity.id">
+                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
+                                                        <div>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <span class="badge bg-warning text-dark rounded-pill"><t t-esc="activity.user_name"/></span>
+                                                            <div class="mt-1 small text-muted"><t t-esc="activity.date_deadline"/></div>
+                                                        </div>
+                                                    </button>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <p class="text-muted text-center my-4">No team activities pending this week.</p>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- REGULAR SALESPERSON VIEW -->
+                    <t t-else="">
+                        <div class="row g-4 mb-4">
+                            <!-- Hero Metrics -->
+                            <div class="col-md-4">
+                                <div class="card shadow-sm border-0 bg-success text-white h-100 o_card_stat" t-on-click="() => this.openConvertedLeads(false)">
+                                    <div class="card-body py-4 d-flex flex-column justify-content-center align-items-center text-center">
+                                        <i class="fa fa-trophy fa-2x mb-3 opacity-75"></i>
+                                        <h2 class="display-4 fw-bold mb-0"><t t-esc="state.data.converted_leads"/></h2>
+                                        <p class="mb-0 fw-medium">Overall Leads Converted</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quotes & AI Suggestion -->
+                            <div class="col-md-8">
+                                <div class="row h-100 g-4">
+                                    <div class="col-12 h-50">
+                                        <div class="card shadow-sm border-0 h-100 bg-gradient-brand text-white overflow-hidden" style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%);">
+                                            <div class="card-body p-4 d-flex flex-column justify-content-center position-relative">
+                                                <i class="fa fa-quote-left fa-3x opacity-25 position-absolute top-0 start-0 m-3"></i>
+                                                <h4 class="fw-light text-center fst-italic px-4 z-1">"<t t-esc="state.data.quote"/>"</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 h-50">
+                                        <div class="card shadow-sm border-0 h-100 border-start border-warning border-4">
+                                            <div class="card-body py-3">
+                                                <h6 class="text-uppercase text-warning fw-bold mb-2"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestion</h6>
+                                                <t t-if="state.data.ai_suggestion.lead_id">
+                                                    <p class="fs-5 mb-2"><t t-esc="state.data.ai_suggestion.text"/></p>
+                                                    <button class="btn btn-outline-warning btn-sm fw-bold" t-on-click="() => this.openLead(state.data.ai_suggestion.lead_id)">
+                                                        Action: Open <t t-esc="state.data.ai_suggestion.lead_name"/>
+                                                    </button>
+                                                </t>
+                                                <t t-else="">
+                                                    <p class="fs-5 mb-0 text-muted"><t t-esc="state.data.ai_suggestion.text"/></p>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Activities -->
+                        <div class="row g-4">
+                            <!-- Today User Tasks -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
+                                        <h5 class="card-title fw-bold text-danger">Pending Today (<t t-esc="state.data.activities_today.length"/>)</h5>
+                                    </div>
+                                    <div class="card-body overflow-auto" style="max-height: 450px;">
+                                        <t t-if="state.data.activities_today.length > 0">
+                                            <div class="list-group list-group-flush">
+                                                <t t-foreach="state.data.activities_today" t-as="activity" t-key="activity.id">
+                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
+                                                        <div>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
+                                                        </div>
+                                                        <i class="fa fa-chevron-right text-muted small"></i>
+                                                    </button>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="text-center my-5 text-muted">
+                                                <i class="fa fa-check-circle fa-4x mb-3 text-success opacity-50"></i>
+                                                <h5>All caught up for today!</h5>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Week User Tasks -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
+                                        <h5 class="card-title fw-bold text-warning">Pending This Week (<t t-esc="state.data.activities_week.length"/>)</h5>
+                                    </div>
+                                    <div class="card-body overflow-auto" style="max-height: 450px;">
+                                        <t t-if="state.data.activities_week.length > 0">
+                                            <div class="list-group list-group-flush">
+                                                <t t-foreach="state.data.activities_week" t-as="activity" t-key="activity.id">
+                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
+                                                        <div>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="small fw-bold text-muted"><t t-esc="activity.date_deadline"/></div>
+                                                        </div>
+                                                    </button>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="text-center my-5 text-muted">
+                                                <p>Nothing pending this week.</p>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </t>
+                </div>
+            </t>
+            
+            <!-- Error State -->
+            <t t-else="">
+                <div class="alert alert-danger m-4 shadow-sm" role="alert">
+                    <h4 class="alert-heading">Error</h4>
+                    <p>Failed to load dashboard data. Please try refreshing.</p>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

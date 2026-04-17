@@ -31,7 +31,15 @@
         'views/admission_report_wizard_views.xml',
         'report/campus_admission_report.xml',
         'views/institute_crm_menu.xml',
+        'views/crm_dashboard_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'institute_crm/static/src/css/crm_dashboard.scss',
+            'institute_crm/static/src/js/crm_dashboard.js',
+            'institute_crm/static/src/xml/crm_dashboard.xml',
+        ],
+    },
     'installable': True,
     'application': False,
     'auto_install': False,
