@@ -115,6 +115,20 @@ export class CrmDashboard extends Component {
             this.notification.add("Failed to copy text.", { type: 'danger' });
         }
     }
+
+    async onChangeStickyNote(ev) {
+        const text = ev.target.value;
+        try {
+            await this.orm.call(
+                "crm.dashboard.data",
+                "save_sticky_note",
+                [text]
+            );
+            // Optionally, add a subtle notification if desired. We avoid standard loading overlay.
+        } catch (e) {
+            console.error("Error saving sticky note:", e);
+        }
+    }
 }
 
 CrmDashboard.template = "institute_crm.CrmDashboard";
