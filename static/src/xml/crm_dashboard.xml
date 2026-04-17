@@ -17,8 +17,7 @@
                     <div class="row mb-4">
                         <div class="col-12">
                             <h1 class="display-6 fw-bold text-dark">
-                                <t t-if="state.data.is_manager">Manager Dashboard</t>
-                                <t t-else=""><t t-esc="state.data.welcome_message"/></t>
+                                <t t-esc="state.data.welcome_message"/>
                             </h1>
                             <p class="text-muted"><t t-esc="state.data.today"/></p>
                         </div>

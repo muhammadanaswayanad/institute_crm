@@ -17,10 +17,16 @@ class CrmDashboard(models.AbstractModel):
         data = {
             'is_manager': is_manager,
             'today': today.strftime("%Y-%m-%d"),
-        }
-        
         user_name = self.env.user.name.split()[0] if self.env.user.name else 'there'
-
+        
+        # General Data
+        welcome_msgs = [
+            f"Welcome {user_name}, let's get it done.",
+            f"Hello {user_name}, ready to crush it today?",
+            f"Great to see you {user_name}!",
+            f"Good to have you back, {user_name}!"
+        ]
+        data['welcome_message'] = random.choice(welcome_msgs)
         
         if not is_manager:
             # NORMAL SALESPERSON LOGIC
@@ -65,14 +71,6 @@ class CrmDashboard(models.AbstractModel):
             
             data['activities_today'] = today_activities
             data['activities_week'] = week_activities
-            
-            welcome_msgs = [
-                f"Welcome {user_name}, let's get it done.",
-                f"Hello {user_name}, ready to crush it today?",
-                f"Great to see you {user_name}!"
-            ]
-            data['welcome_message'] = random.choice(welcome_msgs)
-
             
             # 3. Overall Leads Converted (Won)
             converted_leads = self.env['crm.lead'].search_count([
