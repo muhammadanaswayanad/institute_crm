@@ -14,12 +14,17 @@
             <!-- Dashboard Content -->
             <t t-elif="state.data and !state.data.error">
                 <div class="container-fluid pt-4">
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h1 class="display-6 fw-bold text-dark">
+                    <div class="row mb-4 align-items-center">
+                        <div class="col-8">
+                            <h1 class="display-6 fw-bold text-dark mb-1">
                                 <t t-esc="state.data.welcome_message"/>
                             </h1>
-                            <p class="text-muted"><t t-esc="state.data.today"/></p>
+                            <p class="text-muted mb-0"><t t-esc="state.data.today"/></p>
+                        </div>
+                        <div class="col-4 text-end">
+                            <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow border-0 px-4 py-2 text-white d-inline-flex align-items-center" t-on-click="() => this.openPipeline()" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                                <i class="fa fa-list-ul me-2 fs-5"></i> Goto Pipeline
+                            </button>
                         </div>
                     </div>
 

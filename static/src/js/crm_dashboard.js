@@ -76,6 +76,18 @@ export class CrmDashboard extends Component {
         });
     }
     
+    openPipeline() {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            name: 'Pipeline',
+            res_model: 'crm.lead',
+            view_mode: 'kanban,tree,form',
+            views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+            context: {'default_type': 'opportunity', 'search_default_assigned_to_me': 1},
+            target: 'current',
+        });
+    }
+
     openConvertedLeads(isManager) {
         let domain = [['stage_id.is_won', '=', true]];
         if (!isManager) {
