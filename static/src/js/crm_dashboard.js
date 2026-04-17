@@ -9,6 +9,7 @@ export class CrmDashboard extends Component {
     setup() {
         this.action = useService("action");
         this.orm = useService("orm");
+        this.notification = useService("notification");
         
         this.state = useState({
             data: null,
@@ -73,6 +74,17 @@ export class CrmDashboard extends Component {
             domain: domain,
             target: 'current',
         });
+    }
+
+    async copyDraft(text) {
+        if (!text) return;
+        try {
+            await navigator.clipboard.writeText(text);
+            this.notification.add("Draft copied to clipboard!", { type: 'success' });
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+            this.notification.add("Failed to copy text.", { type: 'danger' });
+        }
     }
 }
 

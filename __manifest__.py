@@ -22,6 +22,7 @@
     'author': 'Custom Development',
     'website': '',
     'depends': ['crm'],
+    'external_dependencies': {'python': ['openai']},
     'data': [
         'security/ir.model.access.csv',
         # 'data/crm_stage_data.xml',  # Commented out to prevent duplicate stages on upgrade
@@ -32,6 +33,7 @@
         'report/campus_admission_report.xml',
         'views/institute_crm_menu.xml',
         'views/crm_dashboard_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
