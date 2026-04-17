@@ -201,29 +201,25 @@
 
                             <!-- Quotes & AI Suggestion -->
                             <div class="col-md-8">
-                                <div class="row h-100 g-4">
-                                    <div class="col-12 h-50">
-                                        <div class="card shadow-sm border-0 h-100 bg-gradient-brand text-white overflow-hidden" style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%);">
-                                            <div class="card-body p-4 d-flex flex-column justify-content-center position-relative">
-                                                <i class="fa fa-quote-left fa-3x opacity-25 position-absolute top-0 start-0 m-3"></i>
-                                                <h4 class="fw-light text-center fst-italic px-4 z-1">"<t t-esc="state.data.quote"/>"</h4>
-                                            </div>
+                                <div class="d-flex flex-column gap-4 h-100">
+                                    <div class="card shadow-sm border-0 flex-fill bg-gradient-brand text-white overflow-hidden" style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%);">
+                                        <div class="card-body p-4 d-flex flex-column justify-content-center position-relative">
+                                            <i class="fa fa-quote-left fa-3x opacity-25 position-absolute top-0 start-0 m-3"></i>
+                                            <h4 class="fw-light text-center fst-italic px-4 z-1">"<t t-esc="state.data.quote"/>"</h4>
                                         </div>
                                     </div>
-                                    <div class="col-12 h-50">
-                                        <div class="card shadow-sm border-0 h-100 border-start border-warning border-4">
-                                            <div class="card-body py-3">
-                                                <h6 class="text-uppercase text-warning fw-bold mb-2"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestion</h6>
-                                                <t t-if="state.data.ai_suggestion.lead_id">
-                                                    <p class="fs-5 mb-2"><t t-esc="state.data.ai_suggestion.text"/></p>
-                                                    <button class="btn btn-outline-warning btn-sm fw-bold" t-on-click="() => this.openLead(state.data.ai_suggestion.lead_id)">
-                                                        Action: Open <t t-esc="state.data.ai_suggestion.lead_name"/>
-                                                    </button>
-                                                </t>
-                                                <t t-else="">
-                                                    <p class="fs-5 mb-0 text-muted"><t t-esc="state.data.ai_suggestion.text"/></p>
-                                                </t>
-                                            </div>
+                                    <div class="card shadow-sm border-0 flex-fill border-start border-warning border-4">
+                                        <div class="card-body py-3">
+                                            <h6 class="text-uppercase text-warning fw-bold mb-2"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestion</h6>
+                                            <t t-if="state.data.ai_suggestion.lead_id">
+                                                <p class="fs-5 mb-2"><t t-esc="state.data.ai_suggestion.text"/></p>
+                                                <button class="btn btn-outline-warning btn-sm fw-bold" t-on-click="() => this.openLead(state.data.ai_suggestion.lead_id)">
+                                                    Action: Open <t t-esc="state.data.ai_suggestion.lead_name"/>
+                                                </button>
+                                            </t>
+                                            <t t-else="">
+                                                <p class="fs-5 mb-0 text-muted"><t t-esc="state.data.ai_suggestion.text"/></p>
+                                            </t>
                                         </div>
                                     </div>
                                 </div>
