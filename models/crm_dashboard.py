@@ -19,6 +19,9 @@ class CrmDashboard(models.AbstractModel):
             'today': today.strftime("%Y-%m-%d"),
         }
         
+        user_name = self.env.user.name.split()[0] if self.env.user.name else 'there'
+
+        
         if not is_manager:
             # NORMAL SALESPERSON LOGIC
             
@@ -50,8 +53,26 @@ class CrmDashboard(models.AbstractModel):
                 ['res_name', 'summary', 'date_deadline', 'res_id', 'activity_type_id']
             )
             
+            lead_ids = [act['res_id'] for act in today_activities + week_activities]
+            if lead_ids:
+                leads_data = self.env['crm.lead'].search_read([('id', 'in', lead_ids)], ['id', 'student_name', 'name'])
+                lead_map = {l['id']: (l['student_name'] or l['name']) for l in leads_data}
+                for act in today_activities + week_activities:
+                    act['display_name'] = lead_map.get(act['res_id'], act['res_name'])
+            else:
+                for act in today_activities + week_activities:
+                    act['display_name'] = act['res_name']
+            
             data['activities_today'] = today_activities
             data['activities_week'] = week_activities
+            
+            welcome_msgs = [
+                f"Welcome {user_name}, let's get it done.",
+                f"Hello {user_name}, ready to crush it today?",
+                f"Great to see you {user_name}!"
+            ]
+            data['welcome_message'] = random.choice(welcome_msgs)
+
             
             # 3. Overall Leads Converted (Won)
             converted_leads = self.env['crm.lead'].search_count([
@@ -147,12 +168,44 @@ class CrmDashboard(models.AbstractModel):
             )
             
             # For admin, resolving user_id tuple to dict or primitive
+            lead_ids = [act['res_id'] for act in today_activities + week_activities]
+            if lead_ids:
+                leads_data = self.env['crm.lead'].search_read([('id', 'in', lead_ids)], ['id', 'student_name', 'name'])
+                lead_map = {l['id']: (l['student_name'] or l['name']) for l in leads_data}
+            else:
+                lead_map = {}
+                
             for act in today_activities + week_activities:
+                act['display_name'] = lead_map.get(act['res_id'], act['res_name'])
                 if act.get('user_id'):
                     act['user_name'] = act['user_id'][1]
             
+            team_today_count = Activity.search_count(admin_domain + [('date_deadline', '<=', today)])
+            team_week_count = Activity.search_count(admin_domain + [('date_deadline', '>', today), ('date_deadline', '<=', end_of_week)])
+            
+            # Completed activities (messages logged by completed activities)
+            completed_count = self.env['mail.message'].search_count([
+                ('model', '=', 'crm.lead'),
+                ('mail_activity_type_id', '!=', False)
+            ])
+            
             data['team_activities_today'] = today_activities
             data['team_activities_week'] = week_activities
+            data['team_today_count'] = team_today_count
+            data['team_week_count'] = team_week_count
+            data['team_completed_count'] = completed_count
+            
+            # Average lead closure time
+            won_leads = self.env['crm.lead'].search_read(
+                [('stage_id.is_won', '=', True), ('date_closed', '!=', False), ('create_date', '!=', False)],
+                ['create_date', 'date_closed']
+            )
+            if won_leads:
+                total_seconds = sum((l['date_closed'] - l['create_date']).total_seconds() for l in won_leads)
+                avg_days = (total_seconds / len(won_leads)) / 86400.0
+                data['avg_lead_closure_days'] = round(avg_days, 1)
+            else:
+                data['avg_lead_closure_days'] = 0
             
             # Total admissions / total converted leads for the institute
             data['total_admissions'] = sum(stat['won'] for stat in perf_list)

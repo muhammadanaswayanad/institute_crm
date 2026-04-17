@@ -18,7 +18,7 @@
                         <div class="col-12">
                             <h1 class="display-6 fw-bold text-dark">
                                 <t t-if="state.data.is_manager">Manager Dashboard</t>
-                                <t t-else="">My Sales Dashboard</t>
+                                <t t-else=""><t t-esc="state.data.welcome_message"/></t>
                             </h1>
                             <p class="text-muted"><t t-esc="state.data.today"/></p>
                         </div>
@@ -29,13 +29,55 @@
                         <div class="row g-4 mb-4">
                             <!-- Overall Metrics -->
                             <div class="col-md-4">
-                                <div class="card o_card_stat shadow-sm border-0 bg-primary text-white h-100" t-on-click="() => this.openConvertedLeads(true)">
-                                    <div class="card-body py-4 d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <h2 class="display-5 fw-bold mb-0"><t t-esc="state.data.total_admissions"/></h2>
-                                            <p class="mb-0 fw-medium">Total Converted / Admissions</p>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="card o_card_stat shadow-sm border-0 bg-primary text-white" t-on-click="() => this.openConvertedLeads(true)">
+                                            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 class="display-6 fw-bold mb-0"><t t-esc="state.data.total_admissions"/></h3>
+                                                    <p class="mb-0 fw-medium small">Total Admissions</p>
+                                                </div>
+                                                <i class="fa fa-graduation-cap fa-2x opacity-50"></i>
+                                            </div>
                                         </div>
-                                        <i class="fa fa-graduation-cap fa-fluid fa-3x opacity-50"></i>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card o_card_stat shadow-sm border-0 bg-danger text-white">
+                                            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h3 class="display-6 fw-bold mb-0"><t t-esc="state.data.team_today_count"/></h3>
+                                                    <p class="mb-0 fw-medium small">Activities Today</p>
+                                                </div>
+                                                <i class="fa fa-bell fa-2x opacity-50"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card o_card_stat shadow-sm border-0 bg-warning text-dark">
+                                            <div class="card-body p-3 text-center">
+                                                <h4 class="fw-bold mb-0"><t t-esc="state.data.team_week_count"/></h4>
+                                                <small class="fw-medium">Week Pending</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card o_card_stat shadow-sm border-0 bg-success text-white">
+                                            <div class="card-body p-3 text-center">
+                                                <h4 class="fw-bold mb-0"><t t-esc="state.data.team_completed_count"/></h4>
+                                                <small class="fw-medium">Completed</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="card o_card_stat shadow-sm border-0 bg-info text-white">
+                                            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h4 class="fw-bold mb-0"><t t-esc="state.data.avg_lead_closure_days"/> Days</h4>
+                                                    <p class="mb-0 fw-medium small">Avg Closure Time</p>
+                                                </div>
+                                                <i class="fa fa-clock-o fa-2x opacity-50"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -94,7 +136,7 @@
                                                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
                                                             t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
                                                         <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
                                                             <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
                                                         </div>
                                                         <div class="text-end">
@@ -124,7 +166,7 @@
                                                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
                                                             t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
                                                         <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
                                                             <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
                                                         </div>
                                                         <div class="text-end">
@@ -204,7 +246,7 @@
                                                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
                                                             t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
                                                         <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
                                                             <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
                                                         </div>
                                                         <i class="fa fa-chevron-right text-muted small"></i>
@@ -235,7 +277,7 @@
                                                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
                                                             t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
                                                         <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.res_name"/></strong>
+                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
                                                             <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
                                                         </div>
                                                         <div class="text-end">
