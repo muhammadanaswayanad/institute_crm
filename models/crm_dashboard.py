@@ -55,8 +55,22 @@ class CrmDashboard(models.AbstractModel):
                 "Every sale has five basic obstacles: no need, no money, no hurry, no desire, no trust.",
                 "The best time to plant a tree was 20 years ago. The second best time is now.",
                 "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+                "Either you run the day, or the day runs you.",
                 "Don't watch the clock; do what it does. Keep going.",
-                "Opportunities don't happen. You create them."
+                "Your attitude, not your aptitude, will determine your altitude.",
+                "Opportunities don't happen. You create them.",
+                "Good things come to people who wait, but better things come to those who go out and get them.",
+                "The harder you work, the luckier you get.",
+                "Don't let the fear of losing be greater than the excitement of winning.",
+                "Act as if what you do makes a difference. It does.",
+                "Great things are done by a series of small things brought together.",
+                "The way to get started is to quit talking and begin doing.",
+                "Believe you can and you're halfway there.",
+                "Setting goals is the first step in turning the invisible into the visible.",
+                "Energy and persistence conquer all things.",
+                "If you are not taking care of your customer, your competitor will.",
+                "Growth and comfort do not coexist.",
+                "To build a long-term, successful enterprise, when you don't close a sale, open a relationship."
             ]
             data['quote'] = random.choice(quotes)
             
