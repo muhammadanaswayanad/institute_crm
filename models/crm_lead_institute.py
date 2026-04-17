@@ -367,83 +367,15 @@ class CrmLeadInstitute(models.Model):
 
     def action_get_ai_suggestion(self):
         self.ensure_one()
-        api_key = self.env['ir.config_parameter'].sudo().get_param('institute_crm.openrouter_api_key')
+        wizard = self.env['crm.lead.ai.suggestion.wizard'].create({
+            'lead_id': self.id,
+        })
         
-        if not OpenAI or not api_key:
-            raise UserError("OpenRouter API is not configured. Please add the API key in Settings.")
-            
-        try:
-            # Fetch recent logs
-            logs = self.env['mail.message'].search_read([
-                ('model', '=', 'crm.lead'),
-                ('res_id', '=', self.id),
-                ('message_type', 'in', ['comment', 'email'])
-            ], ['body', 'date'], limit=5, order='date desc')
-            
-            log_text = " \\n ".join([f"({log['date']}) {log['body']}" for log in logs])
-            
-            context_data = {
-                'lead_name': self.student_name or self.name,
-                'course_interested': self.course_interested.name if self.course_interested else 'Unknown Course',
-                'recent_logs': log_text
-            }
-            
-            salesperson_name = self.env.user.name or 'Salesperson'
-            company_name = self.env.company.name or 'our Institution'
-            
-            sys_prompt = (
-                f"You are an AI sales assistant for {company_name}. The salesperson handling this lead is {salesperson_name}. "
-                "Your goal is to sell admission into our courses (do not refer to 'products' or 'solutions', use 'courses' or 'programs'). "
-                "Review the context for this single lead and their recent communication logs. "
-                "Suggest a short next action for the salesperson and a very brief, casual draft response (e.g. WhatsApp length) ready to copy. "
-                "Output carefully structured strict JSON ONLY, resolving into exactly one object with keys: `suggested_action` (string) and `draft_message` (string). "
-                "No markdown block backticks around the json."
-            )
-            user_prompt = f"Lead Context: {json.dumps(context_data)}"
-            
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
-            
-            response = client.chat.completions.create(
-                model="qwen/qwen-2.5-7b-instruct",
-                messages=[
-                    {"role": "system", "content": sys_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.7,
-                response_format={"type": "json_object"}
-            )
-            
-            resp_content = response.choices[0].message.content
-            if resp_content:
-                resp_content = resp_content.strip()
-                if resp_content.startswith('```json'):
-                    resp_content = resp_content[7:]
-                if resp_content.startswith('```'):
-                    resp_content = resp_content[3:]
-                if resp_content.endswith('```'):
-                    resp_content = resp_content[:-3]
-                    
-                parsed_data = json.loads(resp_content)
-                suggested_action = parsed_data.get('suggested_action', 'Could not generate action.')
-                draft_message = parsed_data.get('draft_message', 'Could not generate message.')
-                
-                wizard = self.env['crm.lead.ai.suggestion.wizard'].create({
-                    'lead_id': self.id,
-                    'suggested_action': suggested_action,
-                    'draft_message': draft_message
-                })
-                
-                return {
-                    'name': 'AI Suggestion',
-                    'type': 'ir.actions.act_window',
-                    'view_mode': 'form',
-                    'res_model': 'crm.lead.ai.suggestion.wizard',
-                    'res_id': wizard.id,
-                    'target': 'new',
-                }
-        except Exception as e:
-            _logger.error("OpenRouter Lead AI Suggestion Failed: %s", str(e))
-            raise UserError(f"Failed to generate suggestion: {str(e)}")
+        return {
+            'name': 'AI Suggestion',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'crm.lead.ai.suggestion.wizard',
+            'res_id': wizard.id,
+            'target': 'new',
+        }
