@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="institute_crm.CrmDashboard" owl="1">
-        <div class="o_action_manager o_crm_custom_dashboard pb-5 overflow-auto bg-100">
+        <div class="o_action_manager o_crm_custom_dashboard pb-5 overflow-auto bg-100 h-100">
             <!-- Loading Indicator -->
             <t t-if="state.isLoading">
                 <div class="d-flex w-100 h-100 align-items-center justify-content-center">
@@ -210,31 +210,53 @@
                                     </div>
                                     <div class="card shadow-sm border-0 flex-fill border-start border-warning border-4">
                                         <div class="card-body py-3 overflow-auto">
-                                            <h6 class="text-uppercase text-warning fw-bold mb-3"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestions</h6>
-                                            <div class="d-flex flex-column gap-3">
-                                                <t t-foreach="state.data.ai_suggestions" t-as="suggestion" t-key="suggestion.lead_id || suggestion_index">
-                                                    <div class="border-bottom pb-3 mb-1 border-warning border-opacity-25 border-1">
-                                                        <t t-if="suggestion.lead_id">
-                                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                <h6 class="fw-bold mb-0 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
-                                                            </div>
-                                                            <p class="fs-6 mb-2 text-muted fst-italic">"<t t-esc="suggestion.draft_message"/>"</p>
-                                                            <div class="d-flex gap-2">
-                                                                <button class="btn btn-outline-warning btn-sm fw-bold rounded-pill" t-on-click="() => this.openLead(suggestion.lead_id)">
-                                                                    <i class="fa fa-folder-open me-1"></i> Open <t t-esc="suggestion.lead_name"/>
-                                                                </button>
-                                                                <button class="btn btn-outline-secondary btn-sm fw-bold rounded-pill" t-on-click="() => this.copyDraft(suggestion.draft_message)">
-                                                                    <i class="fa fa-copy me-1"></i> Copy Draft
-                                                                </button>
-                                                            </div>
-                                                        </t>
-                                                        <t t-else="">
-                                                            <h6 class="fw-bold mb-1 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
-                                                            <p class="fs-6 mb-0 text-muted"><t t-esc="suggestion.draft_message"/></p>
-                                                        </t>
-                                                    </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="text-uppercase text-warning fw-bold mb-0"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestions</h6>
+                                                <t t-if="!state.aiSuggestions and !state.isAiLoading">
+                                                    <button class="btn btn-sm btn-warning fw-bold text-dark rounded-pill shadow-sm" t-on-click="() => this.fetchAiSuggestions()">
+                                                        <i class="fa fa-magic me-1"></i> Generate
+                                                    </button>
                                                 </t>
                                             </div>
+                                            
+                                            <t t-if="state.isAiLoading">
+                                                <div class="d-flex justify-content-center py-4">
+                                                    <div class="spinner-border text-warning" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                            <t t-elif="state.aiSuggestions">
+                                                <div class="d-flex flex-column gap-3">
+                                                    <t t-foreach="state.aiSuggestions" t-as="suggestion" t-key="suggestion.lead_id || suggestion_index">
+                                                        <div class="border-bottom pb-3 mb-1 border-warning border-opacity-25 border-1">
+                                                            <t t-if="suggestion.lead_id">
+                                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                    <h6 class="fw-bold mb-0 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
+                                                                </div>
+                                                                <p class="fs-6 mb-2 text-muted fst-italic">"<t t-esc="suggestion.draft_message"/>"</p>
+                                                                <div class="d-flex gap-2">
+                                                                    <button class="btn btn-outline-warning btn-sm fw-bold rounded-pill" t-on-click="() => this.openLead(suggestion.lead_id)">
+                                                                        <i class="fa fa-folder-open me-1"></i> Open <t t-esc="suggestion.lead_name"/>
+                                                                    </button>
+                                                                    <button class="btn btn-outline-secondary btn-sm fw-bold rounded-pill" t-on-click="() => this.copyDraft(suggestion.draft_message)">
+                                                                        <i class="fa fa-copy me-1"></i> Copy Draft
+                                                                    </button>
+                                                                </div>
+                                                            </t>
+                                                            <t t-else="">
+                                                                <h6 class="fw-bold mb-1 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
+                                                                <p class="fs-6 mb-0 text-muted"><t t-esc="suggestion.draft_message"/></p>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="text-center py-4">
+                                                    <p class="text-muted mb-0">Click generate to analyze your pipeline for personalized advice.</p>
+                                                </div>
+                                            </t>
                                         </div>
                                     </div>
                                 </div>

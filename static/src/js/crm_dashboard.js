@@ -14,6 +14,8 @@ export class CrmDashboard extends Component {
         this.state = useState({
             data: null,
             isLoading: true,
+            aiSuggestions: null,
+            isAiLoading: false,
         });
 
         onWillStart(async () => {
@@ -34,6 +36,21 @@ export class CrmDashboard extends Component {
             this.state.data = { error: true };
         }
         this.state.isLoading = false;
+    }
+
+    async fetchAiSuggestions() {
+        this.state.isAiLoading = true;
+        try {
+            this.state.aiSuggestions = await this.orm.call(
+                "crm.dashboard.data",
+                "get_ai_suggestions",
+                []
+            );
+        } catch (e) {
+            console.error("Error loading AI suggestions:", e);
+            this.state.aiSuggestions = [];
+        }
+        this.state.isAiLoading = false;
     }
 
     // Handlers

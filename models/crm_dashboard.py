@@ -89,109 +89,7 @@ class CrmDashboard(models.AbstractModel):
             ])
             data['converted_leads'] = converted_leads
             
-            # 4. OpenRouter AI Suggestion Generation
-            api_key = self.env['ir.config_parameter'].sudo().get_param('institute_crm.openrouter_api_key')
-            ai_suggestions = []
-            
-            if OpenAI and api_key:
-                try:
-                    # Fetch 2 active, non-won leads
-                    target_leads = self.env['crm.lead'].search([
-                        ('user_id', '=', uid),
-                        ('stage_id.is_won', '=', False),
-                        ('active', '=', True)
-                    ], limit=2, order='priority desc, write_date desc')
-                    
-                    if target_leads:
-                        prompt_context = []
-                        for lead in target_leads:
-                            # Fetch up to 3 recent logs
-                            logs = self.env['mail.message'].search_read([
-                                ('model', '=', 'crm.lead'),
-                                ('res_id', '=', lead.id),
-                                ('message_type', 'in', ['comment', 'email'])
-                            ], ['body', 'date'], limit=3, order='date desc')
-                            
-                            log_text = " \\n ".join([f"({log['date']}) {log['body']}" for log in logs])
-                            
-                            prompt_context.append({
-                                'lead_id': lead.id,
-                                'lead_name': lead.student_name or lead.name or 'Unknown Lead',
-                                'recent_logs': log_text
-                            })
-                            
-                        # Build prompt
-                        salesperson_name = self.env.user.name or 'Salesperson'
-                        company_name = self.env.company.name or 'our Institution'
-                        sys_prompt = f"You are an AI sales assistant for {company_name}. The salesperson handling these leads is {salesperson_name}, and your goal is to sell admission into our courses (do not refer to 'products' or 'solutions', use 'courses' or 'programs'). Review the context for 2 leads. Suggest a short next action and a very brief, casual draft response (e.g. WhatsApp length) for each. Output carefully structured strict JSON ONLY, resolving into an array of EXACTLY 2 objects with keys: `lead_id` (integer), `lead_name` (string), `suggested_action` (string), and `draft_message` (string). No markdown block backticks around the json."
-                        user_prompt = f"Leads Context: {json.dumps(prompt_context)}"
-                        
-                        client = OpenAI(
-                            base_url="https://openrouter.ai/api/v1",
-                            api_key=api_key
-                        )
-                        
-                        response = client.chat.completions.create(
-                            model="qwen/qwen-2.5-7b-instruct",
-                            messages=[
-                                {"role": "system", "content": sys_prompt},
-                                {"role": "user", "content": user_prompt}
-                            ],
-                            temperature=0.7,
-                            response_format={"type": "json_object"}
-                        )
-                        
-                        resp_content = response.choices[0].message.content
-                        if resp_content:
-                            # Strip potential markdown formatting sometimes returned by qwen despite instructions
-                            resp_content = resp_content.strip()
-                            if resp_content.startswith('```json'):
-                                resp_content = resp_content[7:]
-                            if resp_content.startswith('```'):
-                                resp_content = resp_content[3:]
-                            if resp_content.endswith('```'):
-                                resp_content = resp_content[:-3]
-                                
-                            parsed_data = json.loads(resp_content)
-                            # Handle both object wrapped array or direct array
-                            if isinstance(parsed_data, dict):
-                                for key, val in parsed_data.items():
-                                    if isinstance(val, list):
-                                        ai_suggestions = val
-                                        break
-                                if not ai_suggestions:
-                                    ai_suggestions = [parsed_data]
-                            elif isinstance(parsed_data, list):
-                                ai_suggestions = parsed_data
-                                
-                except Exception as e:
-                    _logger.error("OpenRouter AI Suggestion Generation Failed: %s", str(e))
-            
-            if not ai_suggestions:
-                # Fallback to old basic query if API fails, key missing, or openai absent
-                last_week = fields.Datetime.now() - timedelta(days=3)
-                forgotten_lead = self.env['crm.lead'].search([
-                    ('user_id', '=', uid),
-                    ('stage_id.is_won', '=', False),
-                    ('write_date', '<', last_week)
-                ], limit=1, order='priority desc, write_date asc')
-                
-                if forgotten_lead:
-                    ai_suggestions = [{
-                        'lead_id': forgotten_lead.id,
-                        'lead_name': forgotten_lead.student_name or forgotten_lead.name,
-                        'suggested_action': f"Lead '{forgotten_lead.student_name or forgotten_lead.name}' hasn't been updated in over 3 days.",
-                        'draft_message': "Send a follow up WhatsApp to check on their interest."
-                    }]
-                else:
-                    ai_suggestions = [{
-                         'lead_id': False,
-                         'lead_name': False,
-                         'suggested_action': "Awesome! You're all caught up.",
-                         'draft_message': "Keep finding new prospects and creating leads."
-                    }]
-            
-            data['ai_suggestions'] = ai_suggestions
+            data['ai_suggestions'] = []
             
         else:
             # CRM ADMIN LOGIC
@@ -299,3 +197,109 @@ class CrmDashboard(models.AbstractModel):
             data['total_admissions'] = sum(stat['won'] for stat in perf_list)
             
         return data
+
+    @api.model
+    def get_ai_suggestions(self):
+        uid = self.env.uid
+        api_key = self.env['ir.config_parameter'].sudo().get_param('institute_crm.openrouter_api_key')
+        ai_suggestions = []
+        
+        if OpenAI and api_key:
+            try:
+                # Fetch 2 active, non-won leads
+                target_leads = self.env['crm.lead'].search([
+                    ('user_id', '=', uid),
+                    ('stage_id.is_won', '=', False),
+                    ('active', '=', True)
+                ], limit=2, order='priority desc, write_date desc')
+                
+                if target_leads:
+                    prompt_context = []
+                    for lead in target_leads:
+                        # Fetch up to 3 recent logs
+                        logs = self.env['mail.message'].search_read([
+                            ('model', '=', 'crm.lead'),
+                            ('res_id', '=', lead.id),
+                            ('message_type', 'in', ['comment', 'email'])
+                        ], ['body', 'date'], limit=3, order='date desc')
+                        
+                        log_text = " \\n ".join([f"({log['date']}) {log['body']}" for log in logs])
+                        
+                        prompt_context.append({
+                            'lead_id': lead.id,
+                            'lead_name': lead.student_name or lead.name or 'Unknown Lead',
+                            'recent_logs': log_text
+                        })
+                        
+                    # Build prompt
+                    salesperson_name = self.env.user.name or 'Salesperson'
+                    company_name = self.env.company.name or 'our Institution'
+                    sys_prompt = f"You are an AI sales assistant for {company_name}. The salesperson handling these leads is {salesperson_name}, and your goal is to sell admission into our courses (do not refer to 'products' or 'solutions', use 'courses' or 'programs'). Review the context for 2 leads. Suggest a short next action and a very brief, casual draft response (e.g. WhatsApp length) for each. Output carefully structured strict JSON ONLY, resolving into an array of EXACTLY 2 objects with keys: `lead_id` (integer), `lead_name` (string), `suggested_action` (string), and `draft_message` (string). No markdown block backticks around the json."
+                    user_prompt = f"Leads Context: {json.dumps(prompt_context)}"
+                    
+                    client = OpenAI(
+                        base_url="https://openrouter.ai/api/v1",
+                        api_key=api_key
+                    )
+                    
+                    response = client.chat.completions.create(
+                        model="qwen/qwen-2.5-7b-instruct",
+                        messages=[
+                            {"role": "system", "content": sys_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        temperature=0.7,
+                        response_format={"type": "json_object"}
+                    )
+                    
+                    resp_content = response.choices[0].message.content
+                    if resp_content:
+                        # Strip potential markdown formatting sometimes returned by qwen despite instructions
+                        resp_content = resp_content.strip()
+                        if resp_content.startswith('```json'):
+                            resp_content = resp_content[7:]
+                        if resp_content.startswith('```'):
+                            resp_content = resp_content[3:]
+                        if resp_content.endswith('```'):
+                            resp_content = resp_content[:-3]
+                            
+                        parsed_data = json.loads(resp_content)
+                        # Handle both object wrapped array or direct array
+                        if isinstance(parsed_data, dict):
+                            for key, val in parsed_data.items():
+                                if isinstance(val, list):
+                                    ai_suggestions = val
+                                    break
+                            if not ai_suggestions:
+                                ai_suggestions = [parsed_data]
+                        elif isinstance(parsed_data, list):
+                            ai_suggestions = parsed_data
+                            
+            except Exception as e:
+                _logger.error("OpenRouter AI Suggestion Generation Failed: %s", str(e))
+        
+        if not ai_suggestions:
+            # Fallback to old basic query if API fails, key missing, or openai absent
+            last_week = fields.Datetime.now() - timedelta(days=3)
+            forgotten_lead = self.env['crm.lead'].search([
+                ('user_id', '=', uid),
+                ('stage_id.is_won', '=', False),
+                ('write_date', '<', last_week)
+            ], limit=1, order='priority desc, write_date asc')
+            
+            if forgotten_lead:
+                ai_suggestions = [{
+                    'lead_id': forgotten_lead.id,
+                    'lead_name': forgotten_lead.student_name or forgotten_lead.name,
+                    'suggested_action': f"Lead '{forgotten_lead.student_name or forgotten_lead.name}' hasn't been updated in over 3 days.",
+                    'draft_message': "Send a follow up WhatsApp to check on their interest."
+                }]
+            else:
+                ai_suggestions = [{
+                     'lead_id': False,
+                     'lead_name': False,
+                     'suggested_action': "Awesome! You're all caught up.",
+                     'draft_message': "Keep finding new prospects and creating leads."
+                }]
+                
+        return ai_suggestions
