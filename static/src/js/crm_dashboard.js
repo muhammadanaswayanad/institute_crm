@@ -3,6 +3,7 @@
 import { Component, useState, onWillStart } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { session } from "@web/session";
 
 export class CrmDashboard extends Component {
     setup() {
@@ -60,7 +61,7 @@ export class CrmDashboard extends Component {
     openConvertedLeads(isManager) {
         let domain = [['stage_id.is_won', '=', true]];
         if (!isManager) {
-            domain.push(['user_id', '=', this.env.session.uid]);
+            domain.push(['user_id', '=', session.uid]);
         }
         
         this.action.doAction({
