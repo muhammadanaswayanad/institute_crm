@@ -95,12 +95,12 @@ class CrmDashboard(models.AbstractModel):
             
             if OpenAI and api_key:
                 try:
-                    # Fetch 3 active, non-won leads
+                    # Fetch 2 active, non-won leads
                     target_leads = self.env['crm.lead'].search([
                         ('user_id', '=', uid),
                         ('stage_id.is_won', '=', False),
                         ('active', '=', True)
-                    ], limit=3, order='priority desc, write_date desc')
+                    ], limit=2, order='priority desc, write_date desc')
                     
                     if target_leads:
                         prompt_context = []
@@ -121,7 +121,9 @@ class CrmDashboard(models.AbstractModel):
                             })
                             
                         # Build prompt
-                        sys_prompt = "You are an AI sales assistant. Review the provided context for 3 leads and suggest the next best action and a draft response for each. Output carefully structured strict JSON ONLY, resolving into an array of EXACTLY 3 objects with keys: `lead_id` (integer), `lead_name` (string), `suggested_action` (string), and `draft_message` (string). No markdown backticks outside or inside the string."
+                        salesperson_name = self.env.user.name or 'Salesperson'
+                        company_name = self.env.company.name or 'our Institution'
+                        sys_prompt = f"You are an AI sales assistant for {company_name}. The salesperson handling these leads is {salesperson_name}, and your goal is to sell admission into our courses (do not refer to 'products' or 'solutions', use 'courses' or 'programs'). Review the context for 2 leads. Suggest a short next action and a very brief, casual draft response (e.g. WhatsApp length) for each. Output carefully structured strict JSON ONLY, resolving into an array of EXACTLY 2 objects with keys: `lead_id` (integer), `lead_name` (string), `suggested_action` (string), and `draft_message` (string). No markdown block backticks around the json."
                         user_prompt = f"Leads Context: {json.dumps(prompt_context)}"
                         
                         client = OpenAI(
