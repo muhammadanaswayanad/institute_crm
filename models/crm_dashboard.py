@@ -17,6 +17,7 @@ class CrmDashboard(models.AbstractModel):
         data = {
             'is_manager': is_manager,
             'today': today.strftime("%Y-%m-%d"),
+        }
         user_name = self.env.user.name.split()[0] if self.env.user.name else 'there'
         
         # General Data
