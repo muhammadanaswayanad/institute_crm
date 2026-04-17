@@ -30,6 +30,7 @@
         'views/institute_crm_views.xml',
         'views/institute_crm_report_views.xml',
         'views/admission_report_wizard_views.xml',
+        'wizard/crm_lead_ai_suggestion_wizard_views.xml',
         'report/campus_admission_report.xml',
         'views/institute_crm_menu.xml',
         'views/crm_dashboard_views.xml',

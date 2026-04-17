@@ -9,6 +9,7 @@
         <field name="arch" type="xml">
             <form string="Student Lead">
                 <header>
+                    <button name="action_get_ai_suggestion" type="object" string="AI Suggestion" class="oe_highlight" icon="fa-magic" invisible="probability == 100 or not active"/>
                     <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}"/>
                 </header>
                 <sheet>
@@ -22,6 +23,9 @@
                             <field name="name" placeholder="Lead Title (e.g., Inquiry for Computer Science)" required="1"/>
                         </h1>
                     </div>
+                    
+                    <field name="active" invisible="1"/>
+                    <field name="probability" invisible="1"/>
                     
                     <group>
                         <group string="Student Information">
