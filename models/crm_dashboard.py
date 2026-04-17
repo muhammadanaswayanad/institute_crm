@@ -11,9 +11,7 @@ try:
 except ImportError:
     OpenAI = None
 
-class ResUsers(models.Model):
-    _inherit = 'res.users'
-    dashboard_sticky_note = fields.Text("Dashboard Sticky Note")
+# Removed ResUsers to avoid postgres schema bootloops
 
 class CrmDashboard(models.AbstractModel):
     _name = 'crm.dashboard.data'
@@ -21,7 +19,7 @@ class CrmDashboard(models.AbstractModel):
 
     @api.model
     def save_sticky_note(self, text):
-        self.env.user.sudo().dashboard_sticky_note = text
+        self.env['ir.config_parameter'].sudo().set_param(f'dashboard_sticky_note_{self.env.uid}', text)
         return True
 
     @api.model
@@ -204,7 +202,7 @@ class CrmDashboard(models.AbstractModel):
             
             # Total admissions / total converted leads for the institute
             data['total_admissions'] = sum(stat['won'] for stat in perf_list)
-            data['admin_sticky_note'] = self.env.user.dashboard_sticky_note or ''
+            data['admin_sticky_note'] = self.env['ir.config_parameter'].sudo().get_param(f'dashboard_sticky_note_{uid}', default='')
             
         return data
 
