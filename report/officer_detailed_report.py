@@ -25,12 +25,14 @@ class OfficerDetailedReport(models.AbstractModel):
             source = lead.source_id.name if lead.source_id else ''
             campus = lead.admitted_campus or ''
             
-            # Fetch Amount Paid from student
+            # Fetch details from student if available
             amount_paid = 0.0
             if 'student.student' in self.env:
                 student = self.env['student.student'].search([('lead_id', '=', lead.id)], limit=1)
                 if student:
                     amount_paid = student.paid_amount
+                    if student.course_id:
+                        course = student.course_id.name
                     
             if officer not in officer_data:
                 officer_data[officer] = []
