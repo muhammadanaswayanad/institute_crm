@@ -18,6 +18,7 @@
                             <t t-set="courses" t-value="campus_tuple[1]"/>
                             
                             <h2 class="text-center" style="background-color: #e6f0ff; padding: 10px; margin-bottom: 0;"><t t-esc="campus.upper()"/></h2>
+                            <h5 class="text-center mt-2 mb-3">Campus Wise Admission Report from <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/> to <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/></h5>
                             
                             <table class="table table-bordered table-sm" style="width: 100%; border-collapse: collapse;">
                                 <thead>

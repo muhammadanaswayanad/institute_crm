@@ -14,6 +14,7 @@ class AdmissionReportWizard(models.TransientModel):
         ('source', 'Source Wise Admission'),
         ('batch', 'Batch Wise Admission'),
         ('officer', 'Admission Officer Wise Admission'),
+        ('officer_detailed', 'Admission Officer Detailed Report'),
     ], string='Report Type', required=True, default='course')
 
     def action_generate_report(self):
@@ -43,6 +44,8 @@ class AdmissionReportWizard(models.TransientModel):
         
         if self.report_type == 'college':
             return self.env.ref('institute_crm.action_report_campus_wise_admission').report_action(self)
+        elif self.report_type == 'officer_detailed':
+            return self.env.ref('institute_crm.action_report_officer_detailed').report_action(self)
         elif self.report_type == 'course':
             group_by_field = 'course_interested'
             group_by_list = ['course_interested']

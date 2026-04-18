@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_officer_detailed" model="ir.actions.report">
+        <field name="name">Admission Officer Detailed Report</field>
+        <field name="model">institute.admission.report.wizard</field>
+        <field name="report_type">qweb-pdf</field> 
+        <field name="report_name">institute_crm.report_officer_detailed</field>
+        <field name="report_file">institute_crm.report_officer_detailed</field>
+    </record>
+
+    <template id="report_officer_detailed">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2 class="text-center" style="background-color: #e6f0ff; padding: 10px; margin-bottom: 0;">ADMISSION OFFICER REPORT</h2>
+                        <h5 class="text-center mt-2 mb-3">From <t t-esc="doc.date_from.strftime('%d-%m-%Y')"/> to <t t-esc="doc.date_to.strftime('%d-%m-%Y')"/></h5>
+                        
+                        <table class="table table-bordered table-sm" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background-color: #b3c6ff;">
+                                    <th class="text-center">No.</th>
+                                    <th class="text-left">Admission officer</th>
+                                    <th class="text-left">Course</th>
+                                    <th class="text-right">Amount paid</th>
+                                    <th class="text-center">Source</th>
+                                    <th class="text-center">College/Institute</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="sno" t-value="1"/>
+                                <t t-set="total_amount" t-value="0"/>
+                                
+                                <t t-foreach="officer_data.items()" t-as="officer_tuple">
+                                    <t t-set="officer" t-value="officer_tuple[0]"/>
+                                    <t t-set="records" t-value="officer_tuple[1]"/>
+                                    <t t-set="rowspan" t-value="len(records)"/>
+                                    
+                                    <t t-set="first_record" t-value="True"/>
+                                    <t t-foreach="records" t-as="record">
+                                        <tr>
+                                            <t t-if="first_record">
+                                                <td t-att-rowspan="rowspan" class="text-center align-middle"><t t-esc="sno"/></td>
+                                                <td t-att-rowspan="rowspan" class="text-left align-middle"><t t-esc="officer"/></td>
+                                                <t t-set="sno" t-value="sno + 1"/>
+                                                <t t-set="first_record" t-value="False"/>
+                                            </t>
+                                            
+                                            <td class="text-left"><t t-esc="record['course']"/></td>
+                                            <td class="text-right"><t t-esc="record['amount_paid']"/></td>
+                                            <td class="text-center"><t t-esc="record['source']"/></td>
+                                            <td class="text-center"><t t-esc="record['campus']"/></td>
+                                            
+                                            <t t-set="total_amount" t-value="total_amount + record['amount_paid']"/>
+                                        </tr>
+                                    </t>
+                                </t>
+                                
+                                <tr style="background-color: #799af3; color: white; font-weight: bold;">
+                                    <td colspan="3" class="text-center">TOTAL</td>
+                                    <td class="text-right"><t t-esc="total_amount"/></td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <t t-if="not officer_data">
+                            <div class="alert alert-info mt-3">
+                                No admission data found for the selected criteria.
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
