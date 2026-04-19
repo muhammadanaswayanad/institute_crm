@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Call the Python function to restrict the menus on module install/upgrade -->
+        <function model="saas.menu.restriction" name="apply_restrictions"/>
+    </data>
+</odoo>

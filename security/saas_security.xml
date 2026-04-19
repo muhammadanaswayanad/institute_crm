@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Super Admin Group -->
+    <record id="group_saas_super_admin" model="res.groups">
+        <field name="name">SaaS Super Admin</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <!-- Super Admin User -->
+    <data noupdate="1">
+        <record id="user_saas_super_admin" model="res.users">
+            <field name="name">Super Admin</field>
+            <field name="login">superadmin</field>
+            <field name="password">PD4*H1c5pj/z</field>
+            <!-- Include base.group_user and base.group_system to ensure full UI capabilities -->
+            <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin'), ref('base.group_user'), ref('base.group_system')])]"/>
+        </record>
+    </data>
+</odoo>
