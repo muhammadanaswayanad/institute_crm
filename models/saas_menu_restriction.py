@@ -14,23 +14,27 @@ class SaaSMenuRestriction(models.AbstractModel):
             _logger.error("SaaS Super Admin group not found. Cannot restrict menus.")
             return
 
-        menus_to_restrict = [
-            'base.menu_administration',            # Settings
-            'base.menu_management',                # Apps
-            'link_tracker.menu_link_tracker_root', # Link Tracker
-            'survey.menu_surveys',                 # Surveys
-            'mass_mailing.mass_mailing_menu_root', # Email Marketing
-            'project.menu_main_pm',                # Project
-            'account.menu_finance',                # Invoicing
-            'board.menu_board_root',               # Dashboards
-            'social.menu_social_global'            # Social Dashboard
-        ]
+        menus_to_restrict = {
+            'Settings': 'base.menu_administration',
+            'Apps': 'base.menu_management',
+            'Link Tracker': 'link_tracker.menu_link_tracker_root',
+            'Surveys': 'survey.menu_surveys',
+            'Email Marketing': 'mass_mailing.mass_mailing_menu_root',
+            'Project': 'project.menu_main_pm',
+            'Invoicing': 'account.menu_finance',
+            'Dashboards': 'board.menu_board_root',
+            'Social Dashboard': 'social.menu_social_global'
+        }
 
-        for xml_id in menus_to_restrict:
+        for display_name, xml_id in menus_to_restrict.items():
             menu = self.env.ref(xml_id, raise_if_not_found=False)
+            if not menu:
+                # Fallback: Find root menu by exact display name
+                menu = self.env['ir.ui.menu'].search([('name', '=', display_name), ('parent_id', '=', False)], limit=1)
+            
             if menu:
                 # Remove all existing groups and add strictly the Super Admin group
                 menu.write({'groups_id': [(6, 0, [super_admin_group.id])]})
-                _logger.info(f"Restricted menu '{xml_id}' to only SaaS Super Admin.")
+                _logger.info("Restricted menu '%s' to only SaaS Super Admin.", display_name)
             else:
-                _logger.info(f"Menu '{xml_id}' not found. Skipping restriction.")
+                _logger.info("Menu '%s' not found. Skipping restriction.", display_name)
