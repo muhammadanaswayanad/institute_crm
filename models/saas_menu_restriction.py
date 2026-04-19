@@ -23,7 +23,10 @@ class SaaSMenuRestriction(models.AbstractModel):
             'Project': 'project.menu_main_pm',
             'Invoicing': 'account.menu_finance',
             'Dashboards': 'board.menu_board_root',
-            'Social Dashboard': 'social.menu_social_global'
+            'Social Dashboard': 'social.menu_social_global',
+            'Employees': 'hr.menu_hr_root',
+            'Sales': 'sale.sale_menu_root',
+            'SmartHive Client': 'smarthive_client.menu_root'
         }
 
         for display_name, xml_id in menus_to_restrict.items():
