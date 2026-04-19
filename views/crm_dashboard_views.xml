@@ -15,5 +15,6 @@
     <!-- Make Dashboard the main action for the CRM App root menu -->
     <record id="crm.crm_menu_root" model="ir.ui.menu">
         <field name="action" ref="institute_crm.action_crm_dashboard"/>
+        <field name="sequence">-3</field>
     </record>
 </odoo>
