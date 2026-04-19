@@ -1,38 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="base.menu_administration" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="base.menu_management" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="link_tracker.menu_link_tracker_root" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="survey.menu_surveys" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="mass_mailing.mass_mailing_menu_root" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="project.menu_main_pm" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="account.menu_finance" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="board.menu_board_root" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
-
-    <record id="social.menu_social_global" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('institute_crm.group_saas_super_admin')])]"/>
-    </record>
+    <data noupdate="0">
+        <function model="saas.menu.restriction" name="apply_restrictions"/>
+    </data>
 </odoo>
