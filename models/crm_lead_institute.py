@@ -302,6 +302,9 @@ class CrmLeadInstitute(models.Model):
         # Capture user_id change for activity scheduling
         user_id_changed = 'user_id' in vals
         
+        # Track leads converting to opportunity
+        leads_converting = self.filtered(lambda l: l.type == 'lead') if vals.get('type') == 'opportunity' else self.env['crm.lead']
+        
         res = super(CrmLeadInstitute, self).write(vals)
         
         if user_id_changed and vals.get('user_id'):
@@ -309,6 +312,14 @@ class CrmLeadInstitute(models.Model):
             new_user = self.env['res.users'].browse(vals['user_id'])
             for lead in self:
                 lead._schedule_salesperson_activity(new_user)
+        
+        # Schedule activity for converted opportunities if not already scheduled by user_id change
+        if leads_converting:
+            for lead in leads_converting:
+                # Only schedule if we didn't just schedule it above due to user_id change
+                if lead.user_id and not (user_id_changed and vals.get('user_id') == lead.user_id.id):
+                    lead._schedule_salesperson_activity(lead.user_id)
+                    
         return res
 
     def _schedule_salesperson_activity(self, user):
