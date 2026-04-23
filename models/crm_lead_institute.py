@@ -259,10 +259,22 @@ class CrmLeadInstitute(models.Model):
         
         # Skip activity scheduling and duplicate check during import
         if not self._context.get('import_file'):
-            leads._check_duplicate_phones()
+            # Duplicate check (runs independently — does not block activity scheduling)
+            try:
+                leads._check_duplicate_phones()
+            except ValidationError:
+                raise  # Re-raise so user still sees the duplicate warning
+            
+            # Schedule follow-up call activity for the assigned salesperson
             for lead in leads:
                 if lead.user_id:
-                    lead._schedule_salesperson_activity(lead.user_id)
+                    try:
+                        lead._schedule_salesperson_activity(lead.user_id)
+                    except Exception as e:
+                        _logger.warning(
+                            "Could not schedule follow-up activity for lead %s (ID: %s): %s",
+                            lead.name, lead.id, str(e)
+                        )
         return leads
 
     def write(self, vals):
