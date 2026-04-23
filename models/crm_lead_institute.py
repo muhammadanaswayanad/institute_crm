@@ -257,8 +257,9 @@ class CrmLeadInstitute(models.Model):
         
         leads = super().create(vals_list)
         
-        # Skip activity scheduling during import to avoid email sender errors
+        # Skip activity scheduling and duplicate check during import
         if not self._context.get('import_file'):
+            leads._check_duplicate_phones()
             for lead in leads:
                 if lead.user_id:
                     lead._schedule_salesperson_activity(lead.user_id)
@@ -310,7 +311,6 @@ class CrmLeadInstitute(models.Model):
                 summary='Follow-up Call (New Assignment)'
             )
 
-    @api.constrains('phone', 'mobile', 'student_phone', 'alternative_phone', 'type', 'active')
     def _check_duplicate_phones(self):
         """Check for duplicate phone/name combination across leads and opportunities.
         A record is only blocked if BOTH the phone number AND the name match an existing record.
