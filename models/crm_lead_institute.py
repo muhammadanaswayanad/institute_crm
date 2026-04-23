@@ -257,9 +257,11 @@ class CrmLeadInstitute(models.Model):
         
         leads = super().create(vals_list)
         
-        for lead in leads:
-            if lead.user_id:
-                lead._schedule_salesperson_activity(lead.user_id)
+        # Skip activity scheduling during import to avoid email sender errors
+        if not self._context.get('import_file'):
+            for lead in leads:
+                if lead.user_id:
+                    lead._schedule_salesperson_activity(lead.user_id)
         return leads
 
     def write(self, vals):
