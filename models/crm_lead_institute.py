@@ -312,10 +312,10 @@ class CrmLeadInstitute(models.Model):
 
     @api.constrains('phone', 'mobile', 'student_phone', 'alternative_phone', 'type', 'active')
     def _check_duplicate_phones(self):
-        """Check for duplicate phone numbers across leads and opportunities"""
-        # Skip duplicate check during data import to allow bulk imports without interruption
-        if self._context.get('import_file'):
-            return
+        """Check for duplicate phone/name combination across leads and opportunities.
+        A record is only blocked if BOTH the phone number AND the name match an existing record.
+        Same phone with a different name is allowed (e.g. family members sharing a number).
+        """
         for record in self:
             if not record.active:
                 continue
@@ -329,21 +329,23 @@ class CrmLeadInstitute(models.Model):
 
             check_digits = set()
             for num in numbers:
-                # Extract only digits
                 digits = re.sub(r'\D', '', num)
                 if len(digits) >= 10:
                     check_digits.add(digits[-10:])
-                elif len(digits) > 5:  # Arbitrary min length if less than 10 digits
+                elif len(digits) > 5:
                     check_digits.add(digits)
 
             if not check_digits:
                 continue
 
+            # Determine the name to compare against (student_name takes priority over lead name)
+            record_name = (record.student_name or record.name or '').strip().lower()
+
             for digits in check_digits:
-                # Use SQL REGEXP_REPLACE to strip non-digits from db fields and compare rightmost chars
-                # This ensures we handle spaces, +91, dashes existing in the database as well
+                # Find existing records with the same phone number
                 self.env.cr.execute(r"""
-                    SELECT id, name, type FROM crm_lead 
+                    SELECT id, COALESCE(student_name, name, '') AS display_name, type
+                    FROM crm_lead 
                     WHERE id != %s 
                     AND active = true
                     AND (
@@ -352,23 +354,22 @@ class CrmLeadInstitute(models.Model):
                         REGEXP_REPLACE(student_phone, '\D', '', 'g') LIKE %s OR
                         REGEXP_REPLACE(alternative_phone, '\D', '', 'g') LIKE %s
                     )
-                    LIMIT 1
                 """, (
-                    record.id, 
-                    f'%{digits}', 
-                    f'%{digits}', 
-                    f'%{digits}', 
-                    f'%{digits}'
+                    record.id,
+                    f'%{digits}',
+                    f'%{digits}',
+                    f'%{digits}',
+                    f'%{digits}',
                 ))
-                
-                res = self.env.cr.fetchone()
-                if res:
-                    dup_id, dup_name, dup_type = res
-                    record_type = "Opportunity" if dup_type == 'opportunity' else "Lead"
-                    raise ValidationError(
-                        f"Duplicate Prevention: A {record_type} with this phone number already exists!\\n"
-                        f"Existing Record: {dup_name}"
-                    )
+
+                for dup_id, dup_name, dup_type in self.env.cr.fetchall():
+                    # Only block if the NAME also matches (same person, not just same phone)
+                    if dup_name and dup_name.strip().lower() == record_name:
+                        record_type = "Opportunity" if dup_type == 'opportunity' else "Lead"
+                        raise ValidationError(
+                            f"Duplicate Prevention: A {record_type} with the same name and phone number already exists!\\n"
+                            f"Existing Record: {dup_name}"
+                        )
 
     def action_get_ai_suggestion(self):
         self.ensure_one()
