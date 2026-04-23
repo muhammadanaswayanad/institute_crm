@@ -311,6 +311,9 @@ class CrmLeadInstitute(models.Model):
     @api.constrains('phone', 'mobile', 'student_phone', 'alternative_phone', 'type', 'active')
     def _check_duplicate_phones(self):
         """Check for duplicate phone numbers across leads and opportunities"""
+        # Skip duplicate check during data import to allow bulk imports without interruption
+        if self._context.get('import_file'):
+            return
         for record in self:
             if not record.active:
                 continue
