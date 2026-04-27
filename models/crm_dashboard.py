@@ -74,43 +74,162 @@ class CrmDashboard(models.AbstractModel):
             ]
             data['quote'] = random.choice(quotes)
             
-            # 2. Activities Today & This Week
-            # We filter activities on CRM lead model
-            Activity = self.env['mail.activity']
-            
-            base_domain = [('user_id', '=', uid), ('res_model', '=', 'crm.lead')]
-            
-            today_activities = Activity.search_read(
-                base_domain + [('date_deadline', '<=', today)],
-                ['res_name', 'summary', 'date_deadline', 'res_id', 'activity_type_id']
+            # --- 1. Personal Conversion Metrics ---
+            # User Win Rate
+            user_total = self.env['crm.lead'].search_count([('user_id', '=', uid)])
+            user_won = self.env['crm.lead'].search_count([('user_id', '=', uid), ('stage_id.is_won', '=', True)])
+            user_win_rate = round((user_won / user_total * 100) if user_total else 0, 1)
+
+            # Team Average
+            team_total = self.env['crm.lead'].search_count([('user_id', '!=', False)])
+            team_won = self.env['crm.lead'].search_count([('user_id', '!=', False), ('stage_id.is_won', '=', True)])
+            team_win_rate = round((team_won / team_total * 100) if team_total else 0, 1)
+
+            # Avg Time to Close
+            user_won_leads = self.env['crm.lead'].search_read([('user_id', '=', uid), ('stage_id.is_won', '=', True)], ['day_close'])
+            avg_close_time = sum(l['day_close'] for l in user_won_leads) / len(user_won_leads) if user_won_leads else 0
+
+            # Top 3 Lost Reasons
+            lost_group = self.env['crm.lead'].read_group(
+                [('user_id', '=', uid), ('active', '=', False), ('lost_reason_id', '!=', False)],
+                ['lost_reason_id'],
+                ['lost_reason_id']
             )
-            
-            week_activities = Activity.search_read(
-                base_domain + [('date_deadline', '>', today), ('date_deadline', '<=', end_of_week)],
-                ['res_name', 'summary', 'date_deadline', 'res_id', 'activity_type_id']
+            lost_group.sort(key=lambda x: x['lost_reason_id_count'], reverse=True)
+            top_lost_reasons = [{'reason': r['lost_reason_id'][1], 'count': r['lost_reason_id_count']} for r in lost_group[:3]]
+
+            # --- 2. Leaderboard ---
+            first_of_month = today.replace(day=1)
+            won_this_month = self.env['crm.lead'].read_group(
+                [('stage_id.is_won', '=', True), ('date_closed', '>=', first_of_month)],
+                ['user_id', 'day_close:avg'],
+                ['user_id'],
+                lazy=False
             )
+            won_this_month.sort(key=lambda x: x['__count'], reverse=True)
+            leaderboard = []
+            top_closer = None
+            fastest_closer = None
+            min_close_time = float('inf')
             
-            lead_ids = [act['res_id'] for act in today_activities + week_activities]
-            if lead_ids:
-                leads_data = self.env['crm.lead'].search_read([('id', 'in', lead_ids)], ['id', 'student_name', 'name'])
-                lead_map = {l['id']: (l['student_name'] or l['name']) for l in leads_data}
-                for act in today_activities + week_activities:
-                    act['display_name'] = lead_map.get(act['res_id'], act['res_name'])
-            else:
-                for act in today_activities + week_activities:
-                    act['display_name'] = act['res_name']
+            for index, res in enumerate(won_this_month):
+                if not res['user_id']: continue
+                u_id = res['user_id'][0]
+                u_name = res['user_id'][1]
+                count = res['__count']
+                avg_close = res['day_close'] or 0
+                
+                badges = []
+                if index == 0:
+                    badges.append('🔥 Top Closer')
+                    if top_closer is None: top_closer = u_id
+                if avg_close < min_close_time and count > 0:
+                    min_close_time = avg_close
+                    fastest_closer = u_id
+                
+                leaderboard.append({
+                    'user_id': u_id,
+                    'user_name': u_name,
+                    'won': count,
+                    'badges': badges,
+                    'rank': index + 1
+                })
             
-            data['activities_today'] = today_activities
-            data['activities_week'] = week_activities
-            
-            # 3. Overall Leads Converted (Won)
-            converted_leads = self.env['crm.lead'].search_count([
-                ('user_id', '=', uid),
-                ('stage_id.is_won', '=', True)
+            for rep in leaderboard:
+                if rep['user_id'] == fastest_closer:
+                    rep['badges'].append('⚡ Fastest Closer')
+
+            # --- 3. Activity Efficiency Score ---
+            try:
+                completed_activities = self.env['mail.message'].search_count([
+                    ('author_id.user_ids', 'in', [uid]),
+                    ('model', '=', 'crm.lead'),
+                    ('subtype_id', '=', self.env.ref('mail.mt_activities').id)
+                ])
+            except ValueError:
+                completed_activities = 0
+            efficiency_score = round((user_won / completed_activities * 100) if completed_activities else 0, 1)
+
+            # --- 4. Personal Trend Data ---
+            last_week_start = today - timedelta(days=14)
+            last_week_end = today - timedelta(days=7)
+            this_week_won = self.env['crm.lead'].search_count([
+                ('user_id', '=', uid), ('stage_id.is_won', '=', True), ('date_closed', '>=', last_week_end)
             ])
-            data['converted_leads'] = converted_leads
+            last_week_won = self.env['crm.lead'].search_count([
+                ('user_id', '=', uid), ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', last_week_start), ('date_closed', '<', last_week_end)
+            ])
+            trend_percent = round(((this_week_won - last_week_won) / last_week_won * 100) if last_week_won else (100 if this_week_won else 0))
+
+            # --- 5. Micro Coaching Tips ---
+            coaching_tips = []
+            source_group = self.env['crm.lead'].read_group(
+                [('user_id', '=', uid), ('stage_id.is_won', '=', True), ('source_id', '!=', False)],
+                ['source_id'], ['source_id']
+            )
+            if source_group:
+                source_group.sort(key=lambda x: x['source_id_count'], reverse=True)
+                top_source = source_group[0]
+                coaching_tips.append(f"Leads from {top_source['source_id'][1]} work best for you ({top_source['source_id_count']} wins).")
             
-            data['ai_suggestions'] = []
+            user_won_leads_dates = self.env['crm.lead'].search_read([('user_id', '=', uid), ('stage_id.is_won', '=', True), ('date_closed', '!=', False)], ['date_closed'], limit=500)
+            if user_won_leads_dates:
+                hours = [l['date_closed'].hour for l in user_won_leads_dates if l['date_closed']]
+                if hours:
+                    best_hour = max(set(hours), key=hours.count)
+                    time_of_day = "morning" if best_hour < 12 else "afternoon" if best_hour < 17 else "evening"
+                    coaching_tips.append(f"You close most of your deals in the {time_of_day} (around {best_hour}:00).")
+
+            if not coaching_tips:
+                coaching_tips.append("Keep following up on your activities to discover your best closing strategies.")
+
+            # --- 6. Priority Queue ---
+            Activity = self.env['mail.activity']
+            base_act_domain = [('user_id', '=', uid), ('res_model', '=', 'crm.lead')]
+            
+            overdue_activities = Activity.search_read(
+                base_act_domain + [('date_deadline', '<', today)],
+                ['res_name', 'summary', 'date_deadline', 'res_id', 'activity_type_id'], limit=15
+            )
+            due_today_activities = Activity.search_read(
+                base_act_domain + [('date_deadline', '=', today)],
+                ['res_name', 'summary', 'date_deadline', 'res_id', 'activity_type_id'], limit=15
+            )
+            hot_leads = self.env['crm.lead'].search_read([
+                ('user_id', '=', uid), ('stage_id.is_won', '=', False), ('active', '=', True),
+                '|', ('priority', '=', '3'), ('probability', '>=', 70)
+            ], ['name', 'student_name', 'probability', 'priority'], limit=15)
+
+            all_act_res_ids = [a['res_id'] for a in overdue_activities + due_today_activities]
+            if all_act_res_ids:
+                act_leads = self.env['crm.lead'].search_read([('id', 'in', all_act_res_ids)], ['id', 'student_name', 'name'])
+                act_lead_map = {l['id']: (l['student_name'] or l['name']) for l in act_leads}
+                for act in overdue_activities + due_today_activities:
+                    act['display_name'] = act_lead_map.get(act['res_id'], act['res_name'])
+            else:
+                for act in overdue_activities + due_today_activities:
+                    act['display_name'] = act['res_name']
+
+            data.update({
+                'user_win_rate': user_win_rate,
+                'team_win_rate': team_win_rate,
+                'avg_close_time': round(avg_close_time, 1),
+                'top_lost_reasons': top_lost_reasons,
+                'leaderboard': leaderboard,
+                'efficiency_score': efficiency_score,
+                'trend_percent': trend_percent,
+                'this_week_won': this_week_won,
+                'coaching_tips': coaching_tips,
+                'overdue_activities': overdue_activities,
+                'due_today_activities': due_today_activities,
+                'hot_leads': hot_leads,
+                'domain_hot_leads': [('user_id', '=', uid), ('stage_id.is_won', '=', False), ('active', '=', True), '|', ('priority', '=', '3'), ('probability', '>=', 70)],
+                'domain_overdue': base_act_domain + [('date_deadline', '<', today)],
+                'domain_due_today': base_act_domain + [('date_deadline', '=', today)],
+                'ai_suggestions': [],
+                'converted_leads': user_won,
+            })
             
         else:
             # CRM ADMIN LOGIC

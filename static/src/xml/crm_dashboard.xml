@@ -346,145 +346,262 @@
 
                     <!-- REGULAR SALESPERSON VIEW -->
                     <t t-else="">
+                        <!-- Salesperson Dashboard -->
                         <div class="row g-4 mb-4">
-                            <!-- Hero Metrics -->
-                            <div class="col-md-4">
-                                <div class="card shadow-sm border-0 bg-success text-white h-100 o_card_stat" t-on-click="() => this.openConvertedLeads(false)">
-                                    <div class="card-body py-4 d-flex flex-column justify-content-center align-items-center text-center">
-                                        <i class="fa fa-trophy fa-2x mb-3 opacity-75"></i>
-                                        <h2 class="display-4 fw-bold mb-0"><t t-esc="state.data.converted_leads"/></h2>
-                                        <p class="mb-0 fw-medium">Overall Leads Converted</p>
+                            <!-- Hero Metrics / Top Row -->
+                            <div class="col-md-3">
+                                <div class="card shadow-sm border-0 h-100 o_hover_lift" style="border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                    <div class="card-body p-4 text-white text-center d-flex flex-column justify-content-center">
+                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide opacity-75">Personal Win Rate</h6>
+                                        <h2 class="display-5 fw-bold mb-1"><t t-esc="state.data.user_win_rate"/>%</h2>
+                                        <div class="badge bg-white bg-opacity-25 rounded-pill px-3 py-2 mt-2">
+                                            <t t-if="state.data.user_win_rate >= state.data.team_win_rate">
+                                                <i class="fa fa-arrow-up"></i> <t t-esc="Math.round(state.data.user_win_rate - state.data.team_win_rate)"/>% above team
+                                            </t>
+                                            <t t-else="">
+                                                <i class="fa fa-arrow-down"></i> <t t-esc="Math.round(state.data.team_win_rate - state.data.user_win_rate)"/>% below team
+                                            </t>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Quotes & AI Suggestion -->
-                            <div class="col-md-8">
-                                <div class="d-flex flex-column gap-4 h-100">
-                                    <div class="card shadow-sm border-0 flex-fill bg-gradient-brand text-white overflow-hidden" style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%);">
-                                        <div class="card-body p-4 d-flex flex-column justify-content-center position-relative">
-                                            <i class="fa fa-quote-left fa-3x opacity-25 position-absolute top-0 start-0 m-3"></i>
-                                            <h4 class="fw-light text-center fst-italic px-4 z-1">"<t t-esc="state.data.quote"/>"</h4>
-                                        </div>
+                            <div class="col-md-3">
+                                <div class="card shadow-sm border-0 h-100 o_hover_lift" style="border-radius: 16px;">
+                                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide text-muted">Activity Efficiency</h6>
+                                        <h2 class="display-5 fw-bold mb-1 text-primary"><t t-esc="state.data.efficiency_score"/>%</h2>
+                                        <p class="small text-muted mb-0">Wins per Activity</p>
                                     </div>
-                                    <div class="card shadow-sm border-0 flex-fill border-start border-warning border-4">
-                                        <div class="card-body py-3 overflow-auto">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h6 class="text-uppercase text-warning fw-bold mb-0"><i class="fa fa-lightbulb-o me-2"></i> AI Suggestions</h6>
-                                                <t t-if="!state.aiSuggestions and !state.isAiLoading">
-                                                    <button class="btn btn-sm btn-warning fw-bold text-dark rounded-pill shadow-sm" t-on-click="() => this.fetchAiSuggestions()">
-                                                        <i class="fa fa-magic me-1"></i> Generate
-                                                    </button>
-                                                </t>
-                                            </div>
-                                            
-                                            <t t-if="state.isAiLoading">
-                                                <div class="d-flex justify-content-center py-4">
-                                                    <div class="spinner-border text-warning" role="status">
-                                                        <span class="visually-hidden">Loading...</span>
-                                                    </div>
-                                                </div>
-                                            </t>
-                                            <t t-elif="state.aiSuggestions">
-                                                <div class="d-flex flex-column gap-3">
-                                                    <t t-foreach="state.aiSuggestions" t-as="suggestion" t-key="suggestion.lead_id || suggestion_index">
-                                                        <div class="border-bottom pb-3 mb-1 border-warning border-opacity-25 border-1">
-                                                            <t t-if="suggestion.lead_id">
-                                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                    <h6 class="fw-bold mb-0 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
-                                                                </div>
-                                                                <p class="fs-6 mb-2 text-muted fst-italic">"<t t-esc="suggestion.draft_message"/>"</p>
-                                                                <div class="d-flex gap-2">
-                                                                    <button class="btn btn-outline-warning btn-sm fw-bold rounded-pill" t-on-click="() => this.openLead(suggestion.lead_id)">
-                                                                        <i class="fa fa-folder-open me-1"></i> Open <t t-esc="suggestion.lead_name"/>
-                                                                    </button>
-                                                                    <button class="btn btn-outline-secondary btn-sm fw-bold rounded-pill" t-on-click="() => this.copyDraft(suggestion.draft_message)">
-                                                                        <i class="fa fa-copy me-1"></i> Copy Draft
-                                                                    </button>
-                                                                </div>
-                                                            </t>
-                                                            <t t-else="">
-                                                                <h6 class="fw-bold mb-1 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
-                                                                <p class="fs-6 mb-0 text-muted"><t t-esc="suggestion.draft_message"/></p>
-                                                            </t>
-                                                        </div>
-                                                    </t>
-                                                </div>
-                                            </t>
-                                            <t t-else="">
-                                                <div class="text-center py-4">
-                                                    <p class="text-muted mb-0">Click generate to analyze your pipeline for personalized advice.</p>
-                                                </div>
-                                            </t>
-                                        </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card shadow-sm border-0 h-100 o_hover_lift" style="border-radius: 16px;">
+                                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide text-muted">Avg Time to Close</h6>
+                                        <h2 class="display-5 fw-bold mb-1 text-info"><t t-esc="state.data.avg_close_time"/> <span class="fs-4">days</span></h2>
+                                        <p class="small text-muted mb-0">From assignment to win</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card shadow-sm border-0 h-100 o_hover_lift" style="border-radius: 16px;">
+                                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide text-muted">This Week Trend</h6>
+                                        <t t-set="trend_color" t-value="state.data.trend_percent >= 0 ? 'text-success' : 'text-danger'"/>
+                                        <h2 t-attf-class="display-5 fw-bold mb-1 {{trend_color}}">
+                                            <t t-if="state.data.trend_percent >= 0">+</t><t t-esc="state.data.trend_percent"/>%
+                                        </h2>
+                                        <p class="small text-muted mb-0"><t t-esc="state.data.this_week_won"/> won this week</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- User Activities -->
-                        <div class="row g-4">
-                            <!-- Today User Tasks -->
-                            <div class="col-md-6">
-                                <div class="card shadow-sm border-0 h-100">
-                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
-                                        <h5 class="card-title fw-bold text-danger">Pending Today (<t t-esc="state.data.activities_today.length"/>)</h5>
+                        <div class="row g-4 mb-4">
+                            <!-- Left Column: Priority Queue & AI -->
+                            <div class="col-md-8 d-flex flex-column gap-4">
+                                <!-- Smart Priority Queue -->
+                                <div class="card shadow-sm border-0" style="border-radius: 16px;">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-list-alt me-2 text-primary"></i> Priority Queue</h5>
                                     </div>
-                                    <div class="card-body overflow-auto" style="max-height: 450px;">
-                                        <t t-if="state.data.activities_today.length > 0">
-                                            <div class="list-group list-group-flush">
-                                                <t t-foreach="state.data.activities_today" t-as="activity" t-key="activity.id">
-                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
-                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
-                                                        <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
-                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <!-- Hot Leads -->
+                                            <div class="col-md-4">
+                                                <div class="bg-danger bg-opacity-10 rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-danger mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-fire"></i> Hot Leads</span>
+                                                        <span class="badge bg-danger rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.hot_leads.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                            <t t-foreach="state.data.hot_leads" t-as="lead" t-key="lead.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openLead(lead.id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="lead.student_name || lead.name"/></div>
+                                                                    <div class="small text-muted d-flex justify-content-between">
+                                                                        <span><t t-esc="lead.probability"/>% Prob</span>
+                                                                        <span><t t-esc="lead.priority == '3' ? '⭐⭐⭐' : ''"/></span>
+                                                                    </div>
+                                                                </button>
+                                                            </t>
                                                         </div>
-                                                        <i class="fa fa-chevron-right text-muted small"></i>
-                                                    </button>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-check-circle fa-2x mb-2 text-danger"></i><p class="small mb-0">No hot leads right now.</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                            <!-- Due Today -->
+                                            <div class="col-md-4">
+                                                <div class="bg-warning bg-opacity-10 rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-warning-emphasis mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-calendar-check-o"></i> Due Today</span>
+                                                        <span class="badge bg-warning text-dark rounded-pill"><t t-esc="state.data.due_today_activities.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.due_today_activities.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                            <t t-foreach="state.data.due_today_activities" t-as="act" t-key="act.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
+                                                                    <div class="small text-muted text-truncate"><t t-esc="act.summary or 'Task'"/></div>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-smile-o fa-2x mb-2 text-warning-emphasis"></i><p class="small mb-0">All caught up today!</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                            <!-- Overdue -->
+                                            <div class="col-md-4">
+                                                <div class="bg-secondary bg-opacity-10 rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-secondary mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-exclamation-circle"></i> Overdue</span>
+                                                        <span class="badge bg-secondary rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.overdue_activities.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                            <t t-foreach="state.data.overdue_activities" t-as="act" t-key="act.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
+                                                                    <div class="small text-danger fw-bold"><t t-esc="act.date_deadline"/></div>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-thumbs-up fa-2x mb-2 text-secondary"></i><p class="small mb-0">Nothing overdue!</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Suggestions -->
+                                <div class="card shadow-sm border-0 border-start border-warning border-4" style="border-radius: 16px;">
+                                    <div class="card-body py-4 overflow-auto">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="text-uppercase text-warning fw-bold mb-0"><i class="fa fa-lightbulb-o me-2"></i> AI Pipeline Assistant</h6>
+                                            <t t-if="!state.aiSuggestions and !state.isAiLoading">
+                                                <button class="btn btn-sm btn-warning fw-bold text-dark rounded-pill shadow-sm" t-on-click="() => this.fetchAiSuggestions()">
+                                                    <i class="fa fa-magic me-1"></i> Analyze Pipeline
+                                                </button>
+                                            </t>
+                                        </div>
+                                        
+                                        <t t-if="state.isAiLoading">
+                                            <div class="d-flex justify-content-center py-4">
+                                                <div class="spinner-border text-warning" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <t t-elif="state.aiSuggestions">
+                                            <div class="d-flex flex-column gap-3">
+                                                <t t-foreach="state.aiSuggestions" t-as="suggestion" t-key="suggestion.lead_id || suggestion_index">
+                                                    <div class="border-bottom pb-3 mb-1 border-warning border-opacity-25 border-1">
+                                                        <t t-if="suggestion.lead_id">
+                                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                <h6 class="fw-bold mb-0 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
+                                                            </div>
+                                                            <p class="fs-6 mb-2 text-muted fst-italic">"<t t-esc="suggestion.draft_message"/>"</p>
+                                                            <div class="d-flex gap-2">
+                                                                <button class="btn btn-outline-warning btn-sm fw-bold rounded-pill" t-on-click="() => this.openLead(suggestion.lead_id)">
+                                                                    <i class="fa fa-folder-open me-1"></i> Open <t t-esc="suggestion.lead_name"/>
+                                                                </button>
+                                                                <button class="btn btn-outline-secondary btn-sm fw-bold rounded-pill" t-on-click="() => this.copyDraft(suggestion.draft_message)">
+                                                                    <i class="fa fa-copy me-1"></i> Copy Draft
+                                                                </button>
+                                                            </div>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <h6 class="fw-bold mb-1 text-dark"><t t-esc="suggestion.suggested_action"/></h6>
+                                                            <p class="fs-6 mb-0 text-muted"><t t-esc="suggestion.draft_message"/></p>
+                                                        </t>
+                                                    </div>
                                                 </t>
                                             </div>
                                         </t>
                                         <t t-else="">
-                                            <div class="text-center my-5 text-muted">
-                                                <i class="fa fa-check-circle fa-4x mb-3 text-success opacity-50"></i>
-                                                <h5>All caught up for today!</h5>
+                                            <div class="text-center py-4">
+                                                <p class="text-muted mb-0">Click generate to scan your pipeline for actionable advice.</p>
                                             </div>
                                         </t>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Week User Tasks -->
-                            <div class="col-md-6">
-                                <div class="card shadow-sm border-0 h-100">
-                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between">
-                                        <h5 class="card-title fw-bold text-warning">Pending This Week (<t t-esc="state.data.activities_week.length"/>)</h5>
-                                    </div>
-                                    <div class="card-body overflow-auto" style="max-height: 450px;">
-                                        <t t-if="state.data.activities_week.length > 0">
-                                            <div class="list-group list-group-flush">
-                                                <t t-foreach="state.data.activities_week" t-as="activity" t-key="activity.id">
-                                                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
-                                                            t-on-click="() => this.openActivity('crm.lead', activity.res_id)">
-                                                        <div>
-                                                            <strong class="d-block text-dark"><t t-esc="activity.display_name"/></strong>
-                                                            <small class="text-muted"><t t-esc="activity.summary or 'Task'"/></small>
-                                                        </div>
-                                                        <div class="text-end">
-                                                            <div class="small fw-bold text-muted"><t t-esc="activity.date_deadline"/></div>
-                                                        </div>
-                                                    </button>
+                            <!-- Right Column: Leaderboard & Coaching -->
+                            <div class="col-md-4 d-flex flex-column gap-4">
+                                <!-- Micro Coaching Tips -->
+                                <div class="card shadow-sm border-0 bg-gradient-brand text-white o_hover_lift" style="border-radius: 16px; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+                                    <div class="card-body p-4 position-relative overflow-hidden">
+                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2"></i>
+                                        <h5 class="fw-bold text-white mb-3"><i class="fa fa-graduation-cap me-2"></i> Performance Insights</h5>
+                                        <t t-if="state.data.coaching_tips and state.data.coaching_tips.length > 0">
+                                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                                <t t-foreach="state.data.coaching_tips" t-as="tip" t-key="tip">
+                                                    <li class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1"></i>
+                                                        <span class="fw-medium text-white-50"><t t-esc="tip"/></span>
+                                                    </li>
                                                 </t>
-                                            </div>
-                                        </t>
-                                        <t t-else="">
-                                            <div class="text-center my-5 text-muted">
-                                                <p>Nothing pending this week.</p>
-                                            </div>
+                                            </ul>
                                         </t>
                                     </div>
                                 </div>
+
+                                <!-- Leaderboard -->
+                                <div class="card shadow-sm border-0 flex-fill" style="border-radius: 16px;">
+                                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-trophy text-warning me-2"></i> This Month's Leaderboard</h5>
+                                    </div>
+                                    <div class="card-body px-0 pt-0">
+                                        <div class="list-group list-group-flush">
+                                            <t t-foreach="state.data.leaderboard" t-as="rep" t-key="rep.user_id">
+                                                <div t-attf-class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center {{ rep.user_id == session.uid ? 'bg-primary bg-opacity-10' : '' }}">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="fw-bold text-muted fs-5" style="width: 20px;"><t t-esc="rep.rank"/></div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark"><t t-esc="rep.user_name"/></div>
+                                                            <div class="d-flex gap-1 mt-1">
+                                                                <t t-foreach="rep.badges" t-as="badge" t-key="badge">
+                                                                    <span class="badge bg-white text-dark shadow-sm border" style="font-size: 0.7rem;"><t t-esc="badge"/></span>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <h4 class="fw-bold mb-0 text-primary"><t t-esc="rep.won"/></h4>
+                                                        <small class="text-muted" style="font-size: 0.7rem;">Wins</small>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Top Lost Reasons -->
+                                <t t-if="state.data.top_lost_reasons and state.data.top_lost_reasons.length > 0">
+                                    <div class="card shadow-sm border-0" style="border-radius: 16px;">
+                                        <div class="card-header bg-white border-0 pt-4 pb-2">
+                                            <h6 class="card-title fw-bold text-muted text-uppercase tracking-wide mb-0">Top Lost Reasons</h6>
+                                        </div>
+                                        <div class="card-body pt-0">
+                                            <div class="d-flex flex-column gap-2">
+                                                <t t-foreach="state.data.top_lost_reasons" t-as="reason" t-key="reason.reason">
+                                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
+                                                        <span class="fw-medium text-dark"><t t-esc="reason.reason"/></span>
+                                                        <span class="badge bg-secondary"><t t-esc="reason.count"/></span>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
                         </div>
 
