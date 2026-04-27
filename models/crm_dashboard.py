@@ -124,6 +124,7 @@ class CrmDashboard(models.AbstractModel):
                 ('stage_id.fold', '=', False)
             ])
             data['alert_untouched_leads'] = untouched_leads
+            data['domain_untouched_leads'] = [('stage_id.is_won', '=', False), ('active', '=', True), ('write_date', '<', three_days_ago.strftime('%Y-%m-%d %H:%M:%S')), ('stage_id.fold', '=', False)]
 
             last_week_start = today - timedelta(days=14)
             last_week_end = today - timedelta(days=7)
@@ -150,12 +151,13 @@ class CrmDashboard(models.AbstractModel):
             
             performance = {}
             for res in leads_group:
+                user_id = res['user_id'][0] if res['user_id'] else False
                 user_name = res['user_id'][1] if res['user_id'] else 'Unassigned'
                 stage_name = res['stage_id'][1] if res['stage_id'] else 'New'
                 count = res['__count']
                 
                 if user_name not in performance:
-                    performance[user_name] = {'total': 0, 'won': 0, 'stages': {}}
+                    performance[user_name] = {'user_id': user_id, 'total': 0, 'won': 0, 'stages': {}}
                 
                 performance[user_name]['total'] += count
                 performance[user_name]['stages'][stage_name] = count
@@ -178,6 +180,7 @@ class CrmDashboard(models.AbstractModel):
                     low_conversion_reps += 1
                 perf_list.append({
                     'user': user,
+                    'user_id': stats.get('user_id'),
                     'total': stats['total'],
                     'won': stats['won'],
                     'win_rate': round(win_rate)
@@ -195,10 +198,11 @@ class CrmDashboard(models.AbstractModel):
             )
             source_perf = {}
             for res in source_group:
+                src_id = res['source_id'][0] if res['source_id'] else False
                 src_name = res['source_id'][1] if res['source_id'] else 'Unknown'
                 count = res['__count']
                 if src_name not in source_perf:
-                    source_perf[src_name] = {'total': 0, 'won': 0, 'lost': 0}
+                    source_perf[src_name] = {'source_id': src_id, 'total': 0, 'won': 0, 'lost': 0}
                 source_perf[src_name]['total'] += count
             
             source_won = self.env['crm.lead'].read_group(

@@ -44,7 +44,8 @@
                                                 </div>
                                             </t>
                                             <t t-if="state.data.alert_untouched_leads > 0">
-                                                <div class="bg-white text-danger px-3 py-2 shadow-sm fw-bold d-flex align-items-center gap-2" style="border-radius: 8px;">
+                                                <div class="bg-white text-danger px-3 py-2 shadow-sm fw-bold d-flex align-items-center gap-2 o_hover_lift" style="border-radius: 8px; cursor: pointer;"
+                                                     t-on-click="() => this.openLeadsList(state.data.domain_untouched_leads, 'Untouched Leads')">
                                                     <i class="fa fa-clock-o"></i> <t t-esc="state.data.alert_untouched_leads"/> leads untouched for 3+ days
                                                 </div>
                                             </t>
@@ -142,7 +143,8 @@
                                             <t t-foreach="state.data.salesperson_perf" t-as="perf" t-key="perf.user">
                                                 <t t-set="hue" t-value="Math.min(perf.win_rate * 6, 120)"/>
                                                 <t t-set="text_color" t-value="(hue > 40 &amp;&amp; hue &lt; 90) ? 'text-dark' : 'text-white'"/>
-                                                <div t-attf-class="p-4 rounded-4 shadow-sm flex-fill text-center {{text_color}} o_heatmap_card" t-attf-style="min-width: 160px; background-color: hsl({{hue}}, 75%, 45%); border: 1px solid rgba(0,0,0,0.05);">
+                                                <div t-attf-class="p-4 rounded-4 shadow-sm flex-fill text-center {{text_color}} o_heatmap_card" t-attf-style="min-width: 160px; background-color: hsl({{hue}}, 75%, 45%); border: 1px solid rgba(0,0,0,0.05); cursor: pointer;"
+                                                     t-on-click="() => perf.user_id ? this.openLeadsList([['user_id', '=', perf.user_id]], perf.user + ' Leads') : this.openLeadsList([['user_id', '=', false]], 'Unassigned Leads')">
                                                     <h6 class="fw-bold mb-2 text-uppercase tracking-wide"><t t-esc="perf.user"/></h6>
                                                     <h2 class="fw-bold mb-1"><t t-esc="perf.win_rate"/>%</h2>
                                                     <div class="badge bg-white bg-opacity-25 rounded-pill px-3 py-2 mt-2">
@@ -196,7 +198,8 @@
                                     <div class="card-body pt-4">
                                         <div class="d-flex flex-column gap-4">
                                             <t t-foreach="state.data.source_performance" t-as="src" t-key="src.source">
-                                                <div>
+                                                <div style="cursor: pointer;" class="o_hover_lift"
+                                                     t-on-click="() => src.source_id ? this.openLeadsList([['source_id', '=', src.source_id]], src.source + ' Leads') : this.openLeadsList([['source_id', '=', false]], 'Unknown Source Leads')">
                                                     <div class="d-flex justify-content-between mb-2">
                                                         <span class="fw-bold text-dark fs-6"><t t-esc="src.source"/></span>
                                                         <span class="small fw-bold text-muted"><span class="text-success"><t t-esc="src.won"/> Won</span> / <span class="text-danger"><t t-esc="src.lost"/> Lost</span></span>
@@ -243,7 +246,8 @@
                                                 funnel_colors[f_index % funnel_colors.length]
                                             "/>
                                             <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mb-2 position-relative o_funnel_stage"
-                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s;">
+                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s; cursor: pointer;"
+                                                 t-on-click="() => this.openLeadsList([['stage_id', '=', f.stage_id]], f.stage + ' Leads')">
                                                 <span class="z-1" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);"><t t-esc="f.stage"/> (<t t-esc="f.count"/>)</span>
                                             </div>
                                         </t>

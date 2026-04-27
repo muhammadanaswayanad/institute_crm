@@ -93,13 +93,16 @@ export class CrmDashboard extends Component {
         if (!isManager) {
             domain.push(['user_id', '=', session.uid]);
         }
-        
+        this.openLeadsList(domain, 'Converted Leads');
+    }
+
+    openLeadsList(domain, title) {
         this.action.doAction({
             type: 'ir.actions.act_window',
-            name: 'Converted Leads',
+            name: title || 'Leads',
             res_model: 'crm.lead',
-            view_mode: 'kanban,tree,form',
-            views: [[false, 'kanban'], [false, 'list'], [false, 'form']],
+            view_mode: 'list,kanban,form',
+            views: [[false, 'list'], [false, 'kanban'], [false, 'form']],
             domain: domain,
             target: 'current',
         });
