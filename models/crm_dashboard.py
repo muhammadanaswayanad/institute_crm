@@ -175,11 +175,22 @@ class CrmDashboard(models.AbstractModel):
             
             user_won_leads_dates = self.env['crm.lead'].search_read([('user_id', '=', uid), ('stage_id.is_won', '=', True), ('date_closed', '!=', False)], ['date_closed'], limit=500)
             if user_won_leads_dates:
-                hours = [l['date_closed'].hour for l in user_won_leads_dates if l['date_closed']]
+                import pytz
+                user_tz = pytz.timezone(self.env.user.tz or 'UTC')
+                hours = []
+                for l in user_won_leads_dates:
+                    if l['date_closed']:
+                        utc_dt = pytz.utc.localize(l['date_closed'])
+                        user_dt = utc_dt.astimezone(user_tz)
+                        hours.append(user_dt.hour)
+                
                 if hours:
                     best_hour = max(set(hours), key=hours.count)
                     time_of_day = "morning" if best_hour < 12 else "afternoon" if best_hour < 17 else "evening"
-                    coaching_tips.append(f"You close most of your deals in the {time_of_day} (around {best_hour}:00).")
+                    display_hour = best_hour if best_hour <= 12 else best_hour - 12
+                    display_hour = 12 if display_hour == 0 else display_hour
+                    am_pm = "AM" if best_hour < 12 else "PM"
+                    coaching_tips.append(f"You close most of your deals in the {time_of_day} (around {display_hour}:00 {am_pm}).")
 
             if not coaching_tips:
                 coaching_tips.append("Keep following up on your activities to discover your best closing strategies.")
