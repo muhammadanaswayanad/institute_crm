@@ -120,7 +120,8 @@ class CrmDashboard(models.AbstractModel):
             untouched_leads = self.env['crm.lead'].search_count([
                 ('stage_id.is_won', '=', False),
                 ('active', '=', True),
-                ('write_date', '<', three_days_ago)
+                ('write_date', '<', three_days_ago),
+                ('stage_id.fold', '=', False)
             ])
             data['alert_untouched_leads'] = untouched_leads
 
