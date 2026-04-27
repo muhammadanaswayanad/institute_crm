@@ -140,9 +140,9 @@
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap gap-3">
                                             <t t-foreach="state.data.salesperson_perf" t-as="perf" t-key="perf.user">
-                                                <t t-set="bg_color" t-value="perf.win_rate >= 20 ? 'bg-success' : (perf.win_rate >= 10 ? 'bg-info' : (perf.win_rate >= 5 ? 'bg-warning' : 'bg-danger'))"/>
-                                                <t t-set="text_color" t-value="perf.win_rate >= 5 and perf.win_rate &lt; 10 ? 'text-dark' : 'text-white'"/>
-                                                <div t-attf-class="p-4 rounded-4 shadow-sm flex-fill text-center {{bg_color}} {{text_color}} o_heatmap_card" style="min-width: 160px;">
+                                                <t t-set="hue" t-value="Math.min(perf.win_rate * 6, 120)"/>
+                                                <t t-set="text_color" t-value="(hue > 40 &amp;&amp; hue &lt; 90) ? 'text-dark' : 'text-white'"/>
+                                                <div t-attf-class="p-4 rounded-4 shadow-sm flex-fill text-center {{text_color}} o_heatmap_card" t-attf-style="min-width: 160px; background-color: hsl({{hue}}, 75%, 45%); border: 1px solid rgba(0,0,0,0.05);">
                                                     <h6 class="fw-bold mb-2 text-uppercase tracking-wide"><t t-esc="perf.user"/></h6>
                                                     <h2 class="fw-bold mb-1"><t t-esc="perf.win_rate"/>%</h2>
                                                     <div class="badge bg-white bg-opacity-25 rounded-pill px-3 py-2 mt-2">
@@ -180,8 +180,8 @@
                                             </t>
                                         </div>
                                         <div class="d-flex justify-content-center gap-4 mt-3 mb-1">
-                                            <div class="d-flex align-items-center gap-2"><span class="badge rounded-pill" style="background: #3b82f6;">&amp;nbsp;&amp;nbsp;</span> <small class="fw-bold text-muted">Activities</small></div>
-                                            <div class="d-flex align-items-center gap-2"><span class="badge rounded-pill" style="background: #10b981;">&amp;nbsp;&amp;nbsp;</span> <small class="fw-bold text-muted">Admissions</small></div>
+                                            <div class="d-flex align-items-center gap-2"><span class="badge rounded-pill d-inline-block" style="background: #3b82f6; width: 24px; height: 12px;"></span> <small class="fw-bold text-muted">Activities</small></div>
+                                            <div class="d-flex align-items-center gap-2"><span class="badge rounded-pill d-inline-block" style="background: #10b981; width: 24px; height: 12px;"></span> <small class="fw-bold text-muted">Admissions</small></div>
                                         </div>
                                     </div>
                                 </div>
@@ -225,11 +225,25 @@
                                     </div>
                                     <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
                                         <t t-set="max_funnel" t-value="state.data.funnel.length > 0 ? state.data.funnel[0].count : 1"/>
+                                        <t t-set="funnel_colors" t-value="[
+                                            'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                                            'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+                                            'linear-gradient(90deg, #ec4899 0%, #db2777 100%)',
+                                            'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)',
+                                            'linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)',
+                                            'linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)'
+                                        ]"/>
                                         <t t-foreach="state.data.funnel" t-as="f" t-key="f.stage">
                                             <t t-set="width_pct" t-value="95 - (f_index * 12)"/>
                                             <t t-set="width_pct" t-value="width_pct &lt; 30 ? 30 : width_pct"/>
+                                            <t t-set="st" t-value="f.stage ? f.stage.toLowerCase() : ''"/>
+                                            <t t-set="bg_style" t-value="
+                                                (st.includes('won') || st.includes('admission')) ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' :
+                                                (st.includes('lost') || st.includes('junk') || st.includes('not intrested')) ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' :
+                                                funnel_colors[f_index % funnel_colors.length]
+                                            "/>
                                             <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mb-2 position-relative o_funnel_stage"
-                                                 t-attf-style="background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%); width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s;">
+                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s;">
                                                 <span class="z-1" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);"><t t-esc="f.stage"/> (<t t-esc="f.count"/>)</span>
                                             </div>
                                         </t>

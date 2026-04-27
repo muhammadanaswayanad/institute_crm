@@ -221,7 +221,7 @@ class CrmDashboard(models.AbstractModel):
                     source_perf[src_name]['lost'] = res['source_id_count']
 
             source_list = [{'source': k, **v} for k, v in source_perf.items()]
-            source_list.sort(key=lambda x: x['total'], reverse=True)
+            source_list.sort(key=lambda x: x['won'], reverse=True)
             data['source_performance'] = source_list[:5]
 
             # --- 4. Time-based Trends (Last 7 Days) ---
