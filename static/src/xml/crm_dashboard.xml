@@ -412,7 +412,7 @@
                                                 <div class="bg-white border-top border-4 border-danger shadow-sm rounded-4 p-3 h-100">
                                                     <h6 class="fw-bold text-danger mb-3 d-flex justify-content-between">
                                                         <span><i class="fa fa-fire"></i> Hot Leads</span>
-                                                        <span class="badge bg-danger rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
+                                                        <span class="badge bg-danger text-white rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
                                                     </h6>
                                                     <t t-if="state.data.hot_leads.length > 0">
                                                         <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
@@ -459,7 +459,7 @@
                                                 <div class="bg-white border-top border-4 border-secondary shadow-sm rounded-4 p-3 h-100">
                                                     <h6 class="fw-bold text-secondary mb-3 d-flex justify-content-between">
                                                         <span><i class="fa fa-exclamation-circle"></i> Overdue</span>
-                                                        <span class="badge bg-secondary rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
+                                                        <span class="badge bg-secondary text-white rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
                                                     </h6>
                                                     <t t-if="state.data.overdue_activities.length > 0">
                                                         <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
@@ -560,23 +560,26 @@
                                         <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-trophy text-warning me-2"></i> This Month's Leaderboard</h5>
                                     </div>
                                     <div class="card-body px-0 pt-0">
-                                        <div class="list-group list-group-flush">
+                                        <div class="d-flex flex-column gap-3 px-3 pb-3">
                                             <t t-foreach="state.data.leaderboard" t-as="rep" t-key="rep.user_id">
-                                                <div t-attf-class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center {{ rep.user_id == state.data.current_uid ? 'bg-primary bg-opacity-10' : '' }}">
+                                                <div t-attf-class="d-flex justify-content-between align-items-center p-3 rounded-4 border {{ rep.user_id == state.data.current_uid ? 'border-primary bg-primary bg-opacity-10 shadow-sm' : 'border-light bg-light o_hover_lift' }}">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="fw-bold text-muted fs-5" style="width: 20px;"><t t-esc="rep.rank"/></div>
+                                                        <div t-attf-class="d-flex align-items-center justify-content-center rounded-circle fw-bold {{ rep.rank == 1 ? 'bg-warning text-dark shadow-sm' : (rep.rank == 2 ? 'bg-secondary text-white shadow-sm' : (rep.rank == 3 ? 'bg-danger bg-opacity-75 text-white shadow-sm' : 'bg-white text-muted border')) }}" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                                                            <t t-if="rep.rank == 1"><i class="fa fa-trophy"></i></t>
+                                                            <t t-else=""><t t-esc="rep.rank"/></t>
+                                                        </div>
                                                         <div>
-                                                            <div class="fw-bold text-dark"><t t-esc="rep.user_name"/></div>
-                                                            <div class="d-flex gap-1 mt-1">
+                                                            <div class="fw-bold text-dark" style="font-size: 1.05rem;"><t t-esc="rep.user_name"/></div>
+                                                            <div class="d-flex flex-wrap gap-1 mt-1">
                                                                 <t t-foreach="rep.badges" t-as="badge" t-key="badge">
-                                                                    <span class="badge bg-white text-dark shadow-sm border" style="font-size: 0.7rem;"><t t-esc="badge"/></span>
+                                                                    <span class="badge bg-white text-dark shadow-sm border border-light" style="font-size: 0.65rem; padding: 0.35em 0.6em;"><t t-esc="badge"/></span>
                                                                 </t>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="text-end">
-                                                        <h4 class="fw-bold mb-0 text-primary"><t t-esc="rep.won"/></h4>
-                                                        <small class="text-muted" style="font-size: 0.7rem;">Wins</small>
+                                                    <div class="text-center p-2 rounded-3 border bg-white shadow-sm" style="min-width: 60px;">
+                                                        <h3 class="fw-bolder mb-0 text-primary" style="line-height: 1;"><t t-esc="rep.won"/></h3>
+                                                        <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">Wins</small>
                                                     </div>
                                                 </div>
                                             </t>

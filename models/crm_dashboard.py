@@ -100,7 +100,7 @@ class CrmDashboard(models.AbstractModel):
 
             # --- 2. Leaderboard ---
             first_of_month = today.replace(day=1)
-            won_this_month = self.env['crm.lead'].read_group(
+            won_this_month = self.env['crm.lead'].sudo().read_group(
                 [('stage_id.is_won', '=', True), ('write_date', '>=', first_of_month)],
                 ['user_id', 'day_close:avg'],
                 ['user_id'],
