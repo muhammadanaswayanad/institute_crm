@@ -537,16 +537,16 @@
                             <!-- Right Column: Leaderboard & Coaching -->
                             <div class="col-md-4 d-flex flex-column gap-4">
                                 <!-- Micro Coaching Tips -->
-                                <div class="card shadow-sm border-0 text-white o_hover_lift" style="border-radius: 16px; background-color: #1f2937;">
+                                <div class="card shadow-sm border-0 border-start border-warning border-4 o_hover_lift" style="border-radius: 16px;">
                                     <div class="card-body p-4 position-relative overflow-hidden">
-                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2 text-white"></i>
-                                        <h5 class="fw-bold text-white mb-3"><i class="fa fa-graduation-cap me-2 text-warning"></i> Performance Insights</h5>
+                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2 text-warning"></i>
+                                        <h5 class="fw-bold text-dark mb-3"><i class="fa fa-graduation-cap me-2 text-warning"></i> Performance Insights</h5>
                                         <t t-if="state.data.coaching_tips and state.data.coaching_tips.length > 0">
                                             <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
                                                 <t t-foreach="state.data.coaching_tips" t-as="tip" t-key="tip">
                                                     <li class="d-flex align-items-start gap-2">
                                                         <i class="fa fa-check-circle text-success mt-1"></i>
-                                                        <span class="fw-medium text-white"><t t-esc="tip"/></span>
+                                                        <span class="fw-medium text-dark"><t t-esc="tip"/></span>
                                                     </li>
                                                 </t>
                                             </ul>
