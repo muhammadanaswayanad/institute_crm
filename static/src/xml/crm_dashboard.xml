@@ -562,7 +562,7 @@
                                     <div class="card-body px-0 pt-0">
                                         <div class="list-group list-group-flush">
                                             <t t-foreach="state.data.leaderboard" t-as="rep" t-key="rep.user_id">
-                                                <div t-attf-class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center {{ rep.user_id == session.uid ? 'bg-primary bg-opacity-10' : '' }}">
+                                                <div t-attf-class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center {{ rep.user_id == state.data.current_uid ? 'bg-primary bg-opacity-10' : '' }}">
                                                     <div class="d-flex align-items-center gap-3">
                                                         <div class="fw-bold text-muted fs-5" style="width: 20px;"><t t-esc="rep.rank"/></div>
                                                         <div>

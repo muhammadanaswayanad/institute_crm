@@ -223,6 +223,7 @@ class CrmDashboard(models.AbstractModel):
                     act['display_name'] = act['res_name']
 
             data.update({
+                'current_uid': uid,
                 'user_win_rate': user_win_rate,
                 'team_win_rate': team_win_rate,
                 'avg_close_time': round(avg_close_time, 1),
