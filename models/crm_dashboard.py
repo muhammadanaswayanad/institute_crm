@@ -272,6 +272,41 @@ class CrmDashboard(models.AbstractModel):
             data['this_week_won'] = this_week_won
             data['last_week_won'] = last_week_won
 
+            # --- SmartHive DNA: System Health Score ---
+            total_pending = self.env['mail.activity'].search_count([('res_model', '=', 'crm.lead')])
+            thirty_days_ago = today - timedelta(days=30)
+            
+            try:
+                completed_30d = self.env['mail.message'].search_count([
+                    ('model', '=', 'crm.lead'), 
+                    ('subtype_id', '=', self.env.ref('mail.mt_activities').id),
+                    ('date', '>=', thirty_days_ago)
+                ])
+            except ValueError:
+                completed_30d = 0
+                
+            follow_up_score = round((completed_30d / (completed_30d + total_pending) * 100) if (completed_30d + total_pending) else 100)
+
+            total_active = self.env['crm.lead'].search_count([('stage_id.is_won', '=', False), ('active', '=', True)])
+            response_score = round(100 - ((untouched_leads / total_active) * 100) if total_active else 100)
+
+            total_won = self.env['crm.lead'].search_count([('stage_id.is_won', '=', True)])
+            total_lost = self.env['crm.lead'].search_count([('active', '=', False), ('probability', '=', 0)])
+            conversion_score = round((total_won / (total_won + total_lost) * 100) if (total_won + total_lost) else 0)
+
+            overdue_pending = self.env['mail.activity'].search_count([('res_model', '=', 'crm.lead'), ('date_deadline', '<', today)])
+            overload_score = round(100 - ((overdue_pending / total_pending) * 100) if total_pending else 100)
+
+            dna_score = round((follow_up_score + response_score + conversion_score + overload_score) / 4)
+
+            data.update({
+                'dna_score': dna_score,
+                'dna_follow_up': follow_up_score,
+                'dna_response': response_score,
+                'dna_conversion': conversion_score,
+                'dna_overload': overload_score
+            })
+
             # --- 2. Team Comparison Heatmap & Performance ---
             leads_group = self.env['crm.lead'].read_group(
                 [], 

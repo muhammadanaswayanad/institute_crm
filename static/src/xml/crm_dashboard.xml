@@ -31,6 +31,68 @@
                     <!-- ADMIN / MANAGER VIEW -->
                     <t t-if="state.data.is_manager">
                         
+                        <!-- SmartHive DNA: System Health Score -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card shadow border-0" style="border-radius: 16px; background: #ffffff;">
+                                    <div class="card-body p-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-4 border-end text-center">
+                                                <h6 class="text-uppercase tracking-wide text-muted fw-bold mb-3"><i class="fa fa-heartbeat text-danger me-2"></i>SmartHive DNA</h6>
+                                                <t t-set="dna_color" t-value="state.data.dna_score >= 80 ? 'text-success' : (state.data.dna_score >= 50 ? 'text-warning' : 'text-danger')"/>
+                                                <h1 class="display-1 fw-bolder mb-0" t-attf-class="{{ dna_color }}" style="text-shadow: 0 4px 12px rgba(0,0,0,0.1);"><t t-esc="state.data.dna_score"/></h1>
+                                                <p class="text-muted fw-bold">Overall Health Score</p>
+                                            </div>
+                                            <div class="col-md-8 px-4">
+                                                <div class="row g-4">
+                                                    <!-- Follow Up -->
+                                                    <div class="col-sm-6">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="fw-bold text-dark"><i class="fa fa-check-square-o text-primary me-2"></i>Follow-ups Done</span>
+                                                            <span class="fw-bold text-primary"><t t-esc="state.data.dna_follow_up"/>/100</span>
+                                                        </div>
+                                                        <div class="progress shadow-sm" style="height: 8px; border-radius: 4px; background-color: #f1f5f9;">
+                                                            <div class="progress-bar bg-primary" role="progressbar" t-attf-style="width: {{ state.data.dna_follow_up }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Response Rate -->
+                                                    <div class="col-sm-6">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="fw-bold text-dark"><i class="fa fa-bolt text-warning me-2"></i>Response Score</span>
+                                                            <span class="fw-bold text-warning"><t t-esc="state.data.dna_response"/>/100</span>
+                                                        </div>
+                                                        <div class="progress shadow-sm" style="height: 8px; border-radius: 4px; background-color: #f1f5f9;">
+                                                            <div class="progress-bar bg-warning" role="progressbar" t-attf-style="width: {{ state.data.dna_response }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Conversion -->
+                                                    <div class="col-sm-6">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="fw-bold text-dark"><i class="fa fa-line-chart text-success me-2"></i>Conversion Rate</span>
+                                                            <span class="fw-bold text-success"><t t-esc="state.data.dna_conversion"/>/100</span>
+                                                        </div>
+                                                        <div class="progress shadow-sm" style="height: 8px; border-radius: 4px; background-color: #f1f5f9;">
+                                                            <div class="progress-bar bg-success" role="progressbar" t-attf-style="width: {{ state.data.dna_conversion }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- Pending Overload -->
+                                                    <div class="col-sm-6">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="fw-bold text-dark"><i class="fa fa-balance-scale text-danger me-2"></i>Pending Overload</span>
+                                                            <span class="fw-bold text-danger"><t t-esc="state.data.dna_overload"/>/100</span>
+                                                        </div>
+                                                        <div class="progress shadow-sm" style="height: 8px; border-radius: 4px; background-color: #f1f5f9;">
+                                                            <div class="progress-bar bg-danger" role="progressbar" t-attf-style="width: {{ state.data.dna_overload }}%"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Smart Alerts -->
                         <div class="row g-4 mb-4">
                             <t t-if="state.data.alert_low_conversion_reps > 0 or state.data.alert_untouched_leads > 0 or state.data.alert_conversion_drop">
