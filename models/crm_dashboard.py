@@ -256,12 +256,16 @@ class CrmDashboard(models.AbstractModel):
             }
 
             # --- 5. Funnel Conversion View ---
+            unfolded_stages = self.env['crm.stage'].search([('fold', '=', False)])
+            unfolded_stage_ids = unfolded_stages.ids
+            
             stage_group = self.env['crm.lead'].read_group(
                 [('stage_id.fold', '=', False)],
                 ['stage_id'],
                 ['stage_id']
             )
-            funnel = [{'stage': res['stage_id'][1] if res['stage_id'] else 'Unknown', 'count': res['stage_id_count']} for res in stage_group]
+            funnel = [{'stage': res['stage_id'][1] if res['stage_id'] else 'Unknown', 'count': res['stage_id_count']} 
+                      for res in stage_group if res.get('stage_id') and res['stage_id'][0] in unfolded_stage_ids]
             funnel.sort(key=lambda x: x['count'], reverse=True)
             data['funnel'] = funnel
 
