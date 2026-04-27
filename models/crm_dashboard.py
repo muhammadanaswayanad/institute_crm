@@ -115,7 +115,31 @@ class CrmDashboard(models.AbstractModel):
         else:
             # CRM ADMIN LOGIC
             
-            # Overall salesperson performance
+            # --- 1. Problem Alerts ---
+            three_days_ago = fields.Datetime.now() - timedelta(days=3)
+            untouched_leads = self.env['crm.lead'].search_count([
+                ('stage_id.is_won', '=', False),
+                ('active', '=', True),
+                ('write_date', '<', three_days_ago)
+            ])
+            data['alert_untouched_leads'] = untouched_leads
+
+            last_week_start = today - timedelta(days=14)
+            last_week_end = today - timedelta(days=7)
+            this_week_won = self.env['crm.lead'].search_count([
+                ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', last_week_end)
+            ])
+            last_week_won = self.env['crm.lead'].search_count([
+                ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', last_week_start),
+                ('date_closed', '<', last_week_end)
+            ])
+            data['alert_conversion_drop'] = last_week_won > this_week_won
+            data['this_week_won'] = this_week_won
+            data['last_week_won'] = last_week_won
+
+            # --- 2. Team Comparison Heatmap & Performance ---
             leads_group = self.env['crm.lead'].read_group(
                 [], 
                 ['user_id', 'stage_id'], 
@@ -133,8 +157,6 @@ class CrmDashboard(models.AbstractModel):
                     performance[user_name] = {'total': 0, 'won': 0, 'stages': {}}
                 
                 performance[user_name]['total'] += count
-                # Assuming "Admitted" or "Won" in stage name or check if we want to search is_won specifically.
-                # Actually, read_group doesn't easily expose is_won from stage. We can do separate query or assume stage logic
                 performance[user_name]['stages'][stage_name] = count
             
             won_leads_group = self.env['crm.lead'].read_group(
@@ -147,17 +169,154 @@ class CrmDashboard(models.AbstractModel):
                 if user_name in performance:
                     performance[user_name]['won'] = res['user_id_count']
             
-            # Format performance for frontend charts
             perf_list = []
+            low_conversion_reps = 0
             for user, stats in performance.items():
+                win_rate = (stats['won'] / stats['total'] * 100) if stats['total'] > 0 else 0
+                if win_rate < 2 and stats['total'] > 0:
+                    low_conversion_reps += 1
                 perf_list.append({
                     'user': user,
                     'total': stats['total'],
-                    'won': stats['won']
+                    'won': stats['won'],
+                    'win_rate': round(win_rate)
                 })
             perf_list.sort(key=lambda x: x['won'], reverse=True)
             data['salesperson_perf'] = perf_list
+            data['alert_low_conversion_reps'] = low_conversion_reps
             
+            # --- 3. Lead Source Performance ---
+            source_group = self.env['crm.lead'].read_group(
+                [],
+                ['source_id', 'stage_id'],
+                ['source_id', 'stage_id'],
+                lazy=False
+            )
+            source_perf = {}
+            for res in source_group:
+                src_name = res['source_id'][1] if res['source_id'] else 'Unknown'
+                count = res['__count']
+                if src_name not in source_perf:
+                    source_perf[src_name] = {'total': 0, 'won': 0, 'lost': 0}
+                source_perf[src_name]['total'] += count
+            
+            source_won = self.env['crm.lead'].read_group(
+                [('stage_id.is_won', '=', True)],
+                ['source_id'],
+                ['source_id']
+            )
+            for res in source_won:
+                src_name = res['source_id'][1] if res['source_id'] else 'Unknown'
+                if src_name in source_perf:
+                    source_perf[src_name]['won'] = res['source_id_count']
+            
+            source_lost = self.env['crm.lead'].read_group(
+                [('active', '=', False)],
+                ['source_id'],
+                ['source_id']
+            )
+            for res in source_lost:
+                src_name = res['source_id'][1] if res['source_id'] else 'Unknown'
+                if src_name in source_perf:
+                    source_perf[src_name]['lost'] = res['source_id_count']
+
+            source_list = [{'source': k, **v} for k, v in source_perf.items()]
+            source_list.sort(key=lambda x: x['total'], reverse=True)
+            data['source_performance'] = source_list[:5]
+
+            # --- 4. Time-based Trends (Last 7 Days) ---
+            trend_dates = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
+            trend_admissions = {d: 0 for d in trend_dates}
+            trend_activities = {d: 0 for d in trend_dates}
+            
+            recent_won = self.env['crm.lead'].search_read([
+                ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', trend_dates[0])
+            ], ['date_closed'])
+            for rw in recent_won:
+                d = rw['date_closed'].strftime('%Y-%m-%d') if rw['date_closed'] else None
+                if d in trend_admissions:
+                    trend_admissions[d] += 1
+                    
+            recent_activities = self.env['mail.message'].search_read([
+                ('model', '=', 'crm.lead'),
+                ('mail_activity_type_id', '!=', False),
+                ('date', '>=', trend_dates[0])
+            ], ['date'])
+            for ra in recent_activities:
+                d = ra['date'].strftime('%Y-%m-%d') if ra['date'] else None
+                if d in trend_activities:
+                    trend_activities[d] += 1
+
+            data['time_trends'] = {
+                'labels': [d[-5:] for d in trend_dates],
+                'admissions': [trend_admissions[d] for d in trend_dates],
+                'activities': [trend_activities[d] for d in trend_dates]
+            }
+
+            # --- 5. Funnel Conversion View ---
+            stage_group = self.env['crm.lead'].read_group(
+                [],
+                ['stage_id'],
+                ['stage_id']
+            )
+            funnel = [{'stage': res['stage_id'][1] if res['stage_id'] else 'Unknown', 'count': res['stage_id_count']} for res in stage_group]
+            funnel.sort(key=lambda x: x['count'], reverse=True)
+            data['funnel'] = funnel
+
+            # --- 6. Revenue Intelligence ---
+            students = self.env['student.student'].search_read(
+                [('lead_id', '!=', False)],
+                ['paid_amount', 'enrollment_date', 'user_id', 'lead_id']
+            )
+            
+            total_revenue = sum(s.get('paid_amount', 0) for s in students)
+            
+            today_str = today.strftime('%Y-%m-%d')
+            month_str = today.strftime('%Y-%m')
+            
+            today_revenue = sum(s.get('paid_amount', 0) for s in students if s.get('enrollment_date') and str(s.get('enrollment_date')).startswith(today_str))
+            month_revenue = sum(s.get('paid_amount', 0) for s in students if s.get('enrollment_date') and str(s.get('enrollment_date')).startswith(month_str))
+            
+            revenue_per_rep = {}
+            for s in students:
+                rep_name = s['user_id'][1] if s.get('user_id') else 'Unassigned'
+                if rep_name not in revenue_per_rep:
+                    revenue_per_rep[rep_name] = 0
+                revenue_per_rep[rep_name] += s.get('paid_amount', 0)
+                
+            rev_rep_list = [{'rep': k, 'revenue': v} for k, v in revenue_per_rep.items()]
+            rev_rep_list.sort(key=lambda x: x['revenue'], reverse=True)
+            
+            avg_deal_value = total_revenue / len(students) if students else 0
+            
+            open_leads = self.env['crm.lead'].search_read(
+                [('stage_id.is_won', '=', False), ('active', '=', True)],
+                ['expected_revenue', 'course_interested']
+            )
+            
+            forecasted_revenue = 0
+            course_ids = [l['course_interested'][0] for l in open_leads if l.get('course_interested')]
+            course_prices = {}
+            if course_ids:
+                courses = self.env['product.product'].search_read([('id', 'in', course_ids)], ['id', 'list_price'])
+                course_prices = {c['id']: c['list_price'] for c in courses}
+                
+            for l in open_leads:
+                if l.get('course_interested') and l['course_interested'][0] in course_prices:
+                    forecasted_revenue += course_prices[l['course_interested'][0]]
+                elif l.get('expected_revenue'):
+                    forecasted_revenue += l['expected_revenue']
+                    
+            data['revenue'] = {
+                'total': total_revenue,
+                'today': today_revenue,
+                'month': month_revenue,
+                'avg_deal': avg_deal_value,
+                'forecast': forecasted_revenue,
+                'per_rep': rev_rep_list[:5]
+            }
+
             # Global pending activities
             Activity = self.env['mail.activity']
             admin_domain = [('res_model', '=', 'crm.lead')]
@@ -174,7 +333,6 @@ class CrmDashboard(models.AbstractModel):
                 limit=20
             )
             
-            # For admin, resolving user_id tuple to dict or primitive
             lead_ids = [act['res_id'] for act in today_activities + week_activities]
             if lead_ids:
                 leads_data = self.env['crm.lead'].search_read([('id', 'in', lead_ids)], ['id', 'student_name', 'name'])
@@ -190,7 +348,6 @@ class CrmDashboard(models.AbstractModel):
             team_today_count = Activity.search_count(admin_domain + [('date_deadline', '<=', today)])
             team_week_count = Activity.search_count(admin_domain + [('date_deadline', '>', today), ('date_deadline', '<=', end_of_week)])
             
-            # Completed activities (messages logged by completed activities)
             completed_count = self.env['mail.message'].search_count([
                 ('model', '=', 'crm.lead'),
                 ('mail_activity_type_id', '!=', False)
@@ -202,7 +359,6 @@ class CrmDashboard(models.AbstractModel):
             data['team_week_count'] = team_week_count
             data['team_completed_count'] = completed_count
             
-            # Average lead closure time
             won_leads = self.env['crm.lead'].search_read(
                 [('stage_id.is_won', '=', True), ('date_closed', '!=', False), ('create_date', '!=', False)],
                 ['create_date', 'date_closed']
@@ -214,7 +370,6 @@ class CrmDashboard(models.AbstractModel):
             else:
                 data['avg_lead_closure_days'] = 0
             
-            # Total admissions / total converted leads for the institute
             data['total_admissions'] = sum(stat['won'] for stat in perf_list)
             data['admin_sticky_note'] = self.env['ir.config_parameter'].sudo().get_param(f'dashboard_sticky_note_{uid}', default='')
             

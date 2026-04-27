@@ -47,4 +47,87 @@
         border: none;
         border-bottom: 1px solid rgba(0,0,0,0.125);
     }
+    
+    /* New Admin Dashboard Styles */
+    .tracking-wide {
+        letter-spacing: 0.05em;
+    }
+    
+    .o_smart_alert {
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .o_revenue_card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.3), 0 10px 10px -5px rgba(16, 185, 129, 0.2);
+        }
+    }
+    
+    .o_hover_lift {
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        &:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+    }
+    
+    .o_heatmap_card {
+        transition: all 0.3s ease;
+        &:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+    }
+    
+    .o_bar_chart {
+        transition: height 1s ease-out;
+        &:hover {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+    }
+    
+    .o_funnel_stage {
+        transition: transform 0.3s ease, filter 0.3s ease;
+        cursor: default;
+        &:hover {
+            transform: scale(1.02) translateX(5px);
+            filter: brightness(1.1);
+        }
+    }
+    
+    .o_notes_card {
+        transition: box-shadow 0.3s ease;
+        &:focus-within {
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.3) !important;
+        }
+    }
+    
+    .custom-scrollbar {
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    }
 }
