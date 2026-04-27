@@ -350,16 +350,16 @@
                         <div class="row g-4 mb-4">
                             <!-- Hero Metrics / Top Row -->
                             <div class="col-md-3">
-                                <div class="card shadow-sm border-0 h-100 o_hover_lift" style="border-radius: 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                    <div class="card-body p-4 text-white text-center d-flex flex-column justify-content-center">
-                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide opacity-75">Personal Win Rate</h6>
-                                        <h2 class="display-5 fw-bold mb-1"><t t-esc="state.data.user_win_rate"/>%</h2>
-                                        <div class="badge bg-white bg-opacity-25 rounded-pill px-3 py-2 mt-2">
+                                <div class="card shadow-sm border-0 border-start border-success border-4 h-100 o_hover_lift" style="border-radius: 16px;">
+                                    <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
+                                        <h6 class="fw-bold mb-2 text-uppercase tracking-wide text-muted">Personal Win Rate</h6>
+                                        <h2 class="display-5 fw-bold mb-1 text-success"><t t-esc="state.data.user_win_rate"/>%</h2>
+                                        <div class="badge bg-light text-dark shadow-sm border rounded-pill px-3 py-2 mt-2 mx-auto">
                                             <t t-if="state.data.user_win_rate >= state.data.team_win_rate">
-                                                <i class="fa fa-arrow-up"></i> <t t-esc="Math.round(state.data.user_win_rate - state.data.team_win_rate)"/>% above team
+                                                <i class="fa fa-arrow-up text-success"></i> <t t-esc="Math.round(state.data.user_win_rate - state.data.team_win_rate)"/>% above team
                                             </t>
                                             <t t-else="">
-                                                <i class="fa fa-arrow-down"></i> <t t-esc="Math.round(state.data.team_win_rate - state.data.user_win_rate)"/>% below team
+                                                <i class="fa fa-arrow-down text-danger"></i> <t t-esc="Math.round(state.data.team_win_rate - state.data.user_win_rate)"/>% below team
                                             </t>
                                         </div>
                                     </div>
@@ -409,15 +409,15 @@
                                         <div class="row g-3">
                                             <!-- Hot Leads -->
                                             <div class="col-md-4">
-                                                <div class="bg-danger bg-opacity-10 rounded-4 p-3 h-100">
+                                                <div class="bg-white border-top border-4 border-danger shadow-sm rounded-4 p-3 h-100">
                                                     <h6 class="fw-bold text-danger mb-3 d-flex justify-content-between">
                                                         <span><i class="fa fa-fire"></i> Hot Leads</span>
                                                         <span class="badge bg-danger rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
                                                     </h6>
                                                     <t t-if="state.data.hot_leads.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
                                                             <t t-foreach="state.data.hot_leads" t-as="lead" t-key="lead.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openLead(lead.id)">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-danger border-opacity-25 o_hover_lift" t-on-click="() => this.openLead(lead.id)">
                                                                     <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="lead.student_name || lead.name"/></div>
                                                                     <div class="small text-muted d-flex justify-content-between">
                                                                         <span><t t-esc="lead.probability"/>% Prob</span>
@@ -434,15 +434,15 @@
                                             </div>
                                             <!-- Due Today -->
                                             <div class="col-md-4">
-                                                <div class="bg-warning bg-opacity-10 rounded-4 p-3 h-100">
+                                                <div class="bg-white border-top border-4 border-warning shadow-sm rounded-4 p-3 h-100">
                                                     <h6 class="fw-bold text-warning-emphasis mb-3 d-flex justify-content-between">
-                                                        <span><i class="fa fa-calendar-check-o"></i> Due Today</span>
+                                                        <span><i class="fa fa-calendar-check-o text-warning"></i> Due Today</span>
                                                         <span class="badge bg-warning text-dark rounded-pill"><t t-esc="state.data.due_today_activities.length"/></span>
                                                     </h6>
                                                     <t t-if="state.data.due_today_activities.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
                                                             <t t-foreach="state.data.due_today_activities" t-as="act" t-key="act.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-warning border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
                                                                     <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
                                                                     <div class="small text-muted text-truncate"><t t-esc="act.summary or 'Task'"/></div>
                                                                 </button>
@@ -456,15 +456,15 @@
                                             </div>
                                             <!-- Overdue -->
                                             <div class="col-md-4">
-                                                <div class="bg-secondary bg-opacity-10 rounded-4 p-3 h-100">
+                                                <div class="bg-white border-top border-4 border-secondary shadow-sm rounded-4 p-3 h-100">
                                                     <h6 class="fw-bold text-secondary mb-3 d-flex justify-content-between">
                                                         <span><i class="fa fa-exclamation-circle"></i> Overdue</span>
                                                         <span class="badge bg-secondary rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
                                                     </h6>
                                                     <t t-if="state.data.overdue_activities.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
                                                             <t t-foreach="state.data.overdue_activities" t-as="act" t-key="act.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border-0 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-secondary border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
                                                                     <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
                                                                     <div class="small text-danger fw-bold"><t t-esc="act.date_deadline"/></div>
                                                                 </button>
@@ -537,16 +537,16 @@
                             <!-- Right Column: Leaderboard & Coaching -->
                             <div class="col-md-4 d-flex flex-column gap-4">
                                 <!-- Micro Coaching Tips -->
-                                <div class="card shadow-sm border-0 bg-gradient-brand text-white o_hover_lift" style="border-radius: 16px; background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);">
+                                <div class="card shadow-sm border-0 bg-dark text-white o_hover_lift" style="border-radius: 16px;">
                                     <div class="card-body p-4 position-relative overflow-hidden">
-                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2"></i>
-                                        <h5 class="fw-bold text-white mb-3"><i class="fa fa-graduation-cap me-2"></i> Performance Insights</h5>
+                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2 text-white"></i>
+                                        <h5 class="fw-bold text-white mb-3"><i class="fa fa-graduation-cap me-2 text-warning"></i> Performance Insights</h5>
                                         <t t-if="state.data.coaching_tips and state.data.coaching_tips.length > 0">
                                             <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
                                                 <t t-foreach="state.data.coaching_tips" t-as="tip" t-key="tip">
                                                     <li class="d-flex align-items-start gap-2">
                                                         <i class="fa fa-check-circle text-success mt-1"></i>
-                                                        <span class="fw-medium text-white-50"><t t-esc="tip"/></span>
+                                                        <span class="fw-medium text-white"><t t-esc="tip"/></span>
                                                     </li>
                                                 </t>
                                             </ul>
