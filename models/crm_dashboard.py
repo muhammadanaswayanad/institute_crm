@@ -256,7 +256,7 @@ class CrmDashboard(models.AbstractModel):
 
             # --- 5. Funnel Conversion View ---
             stage_group = self.env['crm.lead'].read_group(
-                [],
+                [('stage_id.fold', '=', False)],
                 ['stage_id'],
                 ['stage_id']
             )
