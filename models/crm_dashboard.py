@@ -23,7 +23,7 @@ class CrmDashboard(models.AbstractModel):
         return True
 
     @api.model
-    def get_dashboard_data(self):
+    def get_dashboard_data(self, timeframe='month'):
         is_manager = self.env.user.has_group('sales_team.group_sale_manager')
         uid = self.env.uid
         today = fields.Date.context_today(self)
@@ -33,8 +33,13 @@ class CrmDashboard(models.AbstractModel):
         data = {
             'is_manager': is_manager,
             'today': today.strftime("%Y-%m-%d"),
+            'timeframe': timeframe,
         }
         user_name = self.env.user.name.split()[0] if self.env.user.name else 'there'
+        
+        # Fetch hidden users
+        hidden_users = self.env['res.users'].search([('hide_from_dashboard', '=', True)])
+        hidden_user_ids = hidden_users.ids
         
         # General Data
         welcome_msgs = [
@@ -115,6 +120,7 @@ class CrmDashboard(models.AbstractModel):
             for index, res in enumerate(won_this_month):
                 if not res['user_id']: continue
                 u_id = res['user_id'][0]
+                if u_id in hidden_user_ids: continue
                 u_name = res['user_id'][1]
                 count = res['__count']
                 avg_close = res['day_close'] or 0
@@ -308,8 +314,13 @@ class CrmDashboard(models.AbstractModel):
             })
 
             # --- 2. Team Comparison Heatmap & Performance ---
+            heatmap_domain = []
+            if timeframe == 'month':
+                first_of_month = today.replace(day=1)
+                heatmap_domain = [('create_date', '>=', first_of_month)]
+
             leads_group = self.env['crm.lead'].read_group(
-                [], 
+                heatmap_domain, 
                 ['user_id', 'stage_id'], 
                 ['user_id', 'stage_id'],
                 lazy=False
@@ -318,6 +329,9 @@ class CrmDashboard(models.AbstractModel):
             performance = {}
             for res in leads_group:
                 user_id = res['user_id'][0] if res['user_id'] else False
+                if user_id in hidden_user_ids:
+                    continue
+                
                 user_name = res['user_id'][1] if res['user_id'] else 'Unassigned'
                 stage_name = res['stage_id'][1] if res['stage_id'] else 'New'
                 count = res['__count']
@@ -328,8 +342,12 @@ class CrmDashboard(models.AbstractModel):
                 performance[user_name]['total'] += count
                 performance[user_name]['stages'][stage_name] = count
             
+            won_domain = [('stage_id.is_won', '=', True)]
+            if timeframe == 'month':
+                won_domain.append(('write_date', '>=', first_of_month))
+                
             won_leads_group = self.env['crm.lead'].read_group(
-                [('stage_id.is_won', '=', True)],
+                won_domain,
                 ['user_id'],
                 ['user_id']
             )

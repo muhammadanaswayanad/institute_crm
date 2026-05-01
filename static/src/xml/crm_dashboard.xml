@@ -199,6 +199,10 @@
                                 <div class="card shadow-sm border-0" style="border-radius: 16px;">
                                     <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
                                         <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-th me-2 text-primary"></i> Team Comparison Heatmap</h5>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" t-attf-class="btn btn-sm fw-bold {{ state.timeframe === 'month' ? 'btn-primary' : 'btn-outline-primary' }}" t-on-click="() => this.setTimeframe('month')">This Month</button>
+                                            <button type="button" t-attf-class="btn btn-sm fw-bold {{ state.timeframe === 'all' ? 'btn-primary' : 'btn-outline-primary' }}" t-on-click="() => this.setTimeframe('all')">All Time</button>
+                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap gap-3">

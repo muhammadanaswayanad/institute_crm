@@ -16,6 +16,7 @@ export class CrmDashboard extends Component {
             isLoading: true,
             aiSuggestions: null,
             isAiLoading: false,
+            timeframe: 'month',
         });
 
         onWillStart(async () => {
@@ -29,13 +30,18 @@ export class CrmDashboard extends Component {
             this.state.data = await this.orm.call(
                 "crm.dashboard.data",
                 "get_dashboard_data",
-                []
+                [this.state.timeframe]
             );
         } catch (e) {
             console.error("Error loading dashboard data:", e);
             this.state.data = { error: true };
         }
         this.state.isLoading = false;
+    }
+    
+    async setTimeframe(tf) {
+        this.state.timeframe = tf;
+        await this.loadData();
     }
 
     async fetchAiSuggestions() {
