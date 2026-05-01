@@ -408,7 +408,9 @@
                                 </div>
                             </div>
                         </div>
-                                  <!-- REGULAR SALESPERSON VIEW -->
+                    </t>
+
+                    <!-- REGULAR SALESPERSON VIEW -->
                     <t t-else="">
                         
                         <!-- Row 1: Funnel | Performance Insight -->
