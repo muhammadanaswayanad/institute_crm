@@ -230,12 +230,12 @@ class CrmDashboard(models.AbstractModel):
                 top_3_won = next((r['won'] for r in leaderboard if r['rank'] == 3), 0)
                 diff = top_3_won - user_won
                 if diff > 0 and diff <= 5:
-                    coaching_tips.append({'msg': f"⚡ You’re just {diff} deal{'s' if diff > 1 else ''} away from the Top 3!", 'icon': 'fa-bolt text-warning'})
+                    coaching_tips.append({'msg': f"You’re just {diff} deal{'s' if diff > 1 else ''} away from the Top 3!", 'icon': 'fa-bolt text-warning'})
 
             if trend_percent > 0:
-                coaching_tips.append({'msg': f"📈 Great momentum! Your win rate improved by +{trend_percent}% vs last week.", 'icon': 'fa-line-chart text-success'})
+                coaching_tips.append({'msg': f"Great momentum! Your win rate improved by +{trend_percent}% vs last week.", 'icon': 'fa-line-chart text-success'})
             elif trend_percent < 0:
-                coaching_tips.append({'msg': f"📉 Your win volume dropped {abs(trend_percent)}% vs last week. Let's push hard!", 'icon': 'fa-line-chart text-danger'})
+                coaching_tips.append({'msg': f"Your win volume dropped {abs(trend_percent)}% vs last week. Let's push hard!", 'icon': 'fa-line-chart text-danger'})
 
             # Task Completion
             today_str = fields.Date.today()
@@ -252,7 +252,7 @@ class CrmDashboard(models.AbstractModel):
             if total_today > 0:
                 pct = int((completed_today_count / total_today) * 100)
                 if pct > 0:
-                    coaching_tips.append({'msg': f"🏁 {pct}% of your scheduled tasks for today are completed.", 'icon': 'fa-flag text-info'})
+                    coaching_tips.append({'msg': f"{pct}% of your scheduled tasks for today are completed.", 'icon': 'fa-flag text-info'})
 
             # Missed yesterday
             yesterday = today - timedelta(days=1)
@@ -260,7 +260,7 @@ class CrmDashboard(models.AbstractModel):
                 ('user_id', '=', uid), ('res_model', '=', 'crm.lead'), ('date_deadline', '=', yesterday)
             ])
             if missed_yesterday > 0:
-                coaching_tips.append({'msg': f"⚠️ You missed {missed_yesterday} scheduled follow-up{'s' if missed_yesterday > 1 else ''} yesterday.", 'icon': 'fa-exclamation-triangle text-danger'})
+                coaching_tips.append({'msg': f"You missed {missed_yesterday} scheduled follow-up{'s' if missed_yesterday > 1 else ''} yesterday.", 'icon': 'fa-exclamation-triangle text-danger'})
 
             # Neglected leads
             two_days_ago = fields.Datetime.now() - timedelta(days=2)
@@ -272,14 +272,14 @@ class CrmDashboard(models.AbstractModel):
                 ('write_date', '<', two_days_ago)
             ])
             if neglected_leads > 0:
-                coaching_tips.append({'msg': f"🕰️ {neglected_leads} active leads haven't had any updates in over 48 hours.", 'icon': 'fa-history text-danger'})
+                coaching_tips.append({'msg': f"{neglected_leads} active leads haven't had any updates in over 48 hours.", 'icon': 'fa-exclamation-triangle text-danger'})
                 
             # New leads waiting
             new_leads = self.env['crm.lead'].search_count([
                 ('user_id', '=', uid), ('stage_id.name', 'ilike', 'new'), ('active', '=', True)
             ])
             if new_leads > 0:
-                coaching_tips.append({'msg': f"💡 You have {new_leads} leads in 'New' stage waiting to be contacted.", 'icon': 'fa-user-plus text-primary'})
+                coaching_tips.append({'msg': f"You have {new_leads} leads in 'New' stage waiting to be contacted.", 'icon': 'fa-user-plus text-primary'})
 
             # High priority win rate
             high_priority_won = self.env['crm.lead'].search_count([
@@ -291,7 +291,10 @@ class CrmDashboard(models.AbstractModel):
             if high_priority_total > 0:
                 hp_win_rate = int((high_priority_won / high_priority_total) * 100)
                 if hp_win_rate >= 50:
-                    coaching_tips.append({'msg': f"🔥 Awesome! Your win rate on High Priority leads is {hp_win_rate}%.", 'icon': 'fa-fire text-danger'})
+                    coaching_tips.append({'msg': f"Awesome! Your win rate on High Priority leads is {hp_win_rate}%.", 'icon': 'fa-fire text-danger'})
+
+            if len(coaching_tips) < 5:
+                coaching_tips.append({'msg': "Pro tip: Contacting new leads within 5 minutes increases conversion odds by 9x.", 'icon': 'fa-lightbulb-o text-warning'})
 
             if not coaching_tips:
                 coaching_tips.append({'msg': "Keep following up on your activities to discover your best closing strategies.", 'icon': 'fa-lightbulb-o text-warning'})
