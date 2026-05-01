@@ -628,6 +628,39 @@
 
                             <!-- Right Column: Leaderboard & Coaching -->
                             <div class="col-md-4 d-flex flex-column gap-4">
+                                <!-- Pipeline Funnel -->
+                                <div class="card shadow-sm border-0" style="border-radius: 16px;">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                                        <h5 class="card-title fw-bold text-dark"><i class="fa fa-filter me-2 text-primary"></i> My Funnel</h5>
+                                    </div>
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
+                                        <t t-set="max_funnel" t-value="state.data.my_funnel.length > 0 ? state.data.my_funnel[0].count : 1"/>
+                                        <t t-set="funnel_colors" t-value="[
+                                            'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                                            'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+                                            'linear-gradient(90deg, #ec4899 0%, #db2777 100%)',
+                                            'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)',
+                                            'linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)',
+                                            'linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)'
+                                        ]"/>
+                                        <t t-foreach="state.data.my_funnel" t-as="f" t-key="f.stage">
+                                            <t t-set="width_pct" t-value="95 - (f_index * 12)"/>
+                                            <t t-set="width_pct" t-value="width_pct &lt; 30 ? 30 : width_pct"/>
+                                            <t t-set="st" t-value="f.stage ? f.stage.toLowerCase() : ''"/>
+                                            <t t-set="bg_style" t-value="
+                                                (st.includes('won') || st.includes('admission')) ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' :
+                                                (st.includes('lost') || st.includes('junk') || st.includes('not intrested')) ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' :
+                                                funnel_colors[f_index % funnel_colors.length]
+                                            "/>
+                                            <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mb-2 position-relative o_funnel_stage"
+                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s; cursor: pointer;"
+                                                 t-on-click="() => this.openLeadsList([['stage_id', '=', f.stage_id], ['user_id', '=', state.data.current_uid]], f.stage + ' Leads')">
+                                                <span class="z-1" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);"><t t-esc="f.stage"/> (<t t-esc="f.count"/>)</span>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                
                                 <!-- Micro Coaching Tips -->
                                 <div class="card shadow-sm border-0 border-start border-warning border-4 o_hover_lift" style="border-radius: 16px;">
                                     <div class="card-body p-4 position-relative overflow-hidden">

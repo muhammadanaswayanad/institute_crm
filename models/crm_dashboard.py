@@ -285,6 +285,21 @@ class CrmDashboard(models.AbstractModel):
                 'total_leads': len(my_open_leads)
             }
             
+            # --- My Funnel ---
+            unfolded_stages = self.env['crm.stage'].search([('fold', '=', False)])
+            unfolded_stage_ids = unfolded_stages.ids
+            stage_sequences = {s.id: s.sequence for s in unfolded_stages}
+            
+            my_stage_group = self.env['crm.lead'].read_group(
+                [('user_id', '=', uid), ('stage_id.fold', '=', False)],
+                ['stage_id'],
+                ['stage_id']
+            )
+            my_funnel = [{'stage_id': res['stage_id'][0], 'stage': res['stage_id'][1] if res['stage_id'] else 'Unknown', 'count': res['stage_id_count']} 
+                      for res in my_stage_group if res.get('stage_id') and res['stage_id'][0] in unfolded_stage_ids]
+            my_funnel.sort(key=lambda x: stage_sequences.get(x['stage_id'], 0))
+            data['my_funnel'] = my_funnel
+            
         else:
             # NORMAL MANAGER LOGIC
             
@@ -403,6 +418,8 @@ class CrmDashboard(models.AbstractModel):
             perf_list = []
             low_conversion_reps = 0
             for user, stats in performance.items():
+                if stats['total'] == 0 and stats['won'] > 0:
+                    stats['total'] = stats['won']
                 win_rate = (stats['won'] / stats['total'] * 100) if stats['total'] > 0 else 0
                 if win_rate < 2 and stats['total'] > 0:
                     low_conversion_reps += 1
