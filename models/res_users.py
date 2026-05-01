@@ -5,5 +5,6 @@ class ResUsers(models.Model):
 
     hide_from_dashboard = fields.Boolean(
         string="Hide from CRM Dashboard", 
-        help="If checked, this user will not appear on the CRM Dashboard leaderboards or heatmaps."
+        help="If checked, this user will not appear on the CRM Dashboard leaderboards or heatmaps.",
+        prefetch=False
     )
