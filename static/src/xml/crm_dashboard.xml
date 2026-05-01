@@ -408,106 +408,68 @@
                                 </div>
                             </div>
                         </div>
-                    </t>
-
-                    <!-- REGULAR SALESPERSON VIEW -->
+                                  <!-- REGULAR SALESPERSON VIEW -->
                     <t t-else="">
                         
-                        <!-- Leaderboards Top Row -->
+                        <!-- Row 1: Funnel | Performance Insight -->
                         <div class="row g-4 mb-4">
-                            <!-- This Month's Leaderboard -->
+                            <!-- Pipeline Funnel -->
                             <div class="col-md-6">
                                 <div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
-                                    <div class="card-header bg-white border-0 pt-4 pb-2">
-                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-trophy text-warning me-2"></i> This Month's Leaderboard</h5>
+                                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                                        <h5 class="card-title fw-bold text-dark"><i class="fa fa-filter me-2 text-primary"></i> My Funnel</h5>
                                     </div>
-                                    <div class="card-body px-0 pt-0">
-                                        <div class="d-flex flex-column gap-3 px-3 pb-3">
-                                            <t t-foreach="state.data.leaderboard" t-as="rep" t-key="rep.user_id">
-                                                <div t-attf-class="d-flex justify-content-between align-items-center p-3 rounded-4 border {{ rep.user_id == state.data.current_uid ? 'border-primary bg-primary bg-opacity-10 shadow-sm' : 'border-light bg-light o_hover_lift' }}">
-                                                    <div class="d-flex align-items-center gap-3">
-                                                        <div t-attf-class="d-flex align-items-center justify-content-center rounded-circle fw-bold {{ rep.rank == 1 ? 'bg-warning text-dark shadow-sm' : (rep.rank == 2 ? 'bg-secondary text-white shadow-sm' : (rep.rank == 3 ? 'bg-danger bg-opacity-75 text-white shadow-sm' : 'bg-white text-muted border')) }}" style="width: 42px; height: 42px; font-size: 1.1rem;">
-                                                            <t t-if="rep.rank == 1"><i class="fa fa-trophy"></i></t>
-                                                            <t t-else=""><t t-esc="rep.rank"/></t>
-                                                        </div>
-                                                        <div>
-                                                            <div class="fw-bold text-dark" style="font-size: 1.05rem;"><t t-esc="rep.user_name"/></div>
-                                                            <div class="d-flex flex-wrap gap-1 mt-1">
-                                                                <t t-foreach="rep.badges" t-as="badge" t-key="badge">
-                                                                    <span class="badge bg-white text-dark shadow-sm border border-light" style="font-size: 0.65rem; padding: 0.35em 0.6em;"><t t-esc="badge"/></span>
-                                                                </t>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center p-2 rounded-3 border bg-white shadow-sm" style="min-width: 60px;">
-                                                        <h3 class="fw-bolder mb-0 text-primary" style="line-height: 1;"><t t-esc="rep.won"/></h3>
-                                                        <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">Wins</small>
-                                                    </div>
-                                                </div>
-                                            </t>
-                                        </div>
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
+                                        <t t-set="max_funnel" t-value="state.data.my_funnel.length > 0 ? state.data.my_funnel[0].count : 1"/>
+                                        <t t-set="funnel_colors" t-value="[
+                                            'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
+                                            'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+                                            'linear-gradient(90deg, #ec4899 0%, #db2777 100%)',
+                                            'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)',
+                                            'linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)',
+                                            'linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)'
+                                        ]"/>
+                                        <t t-foreach="state.data.my_funnel" t-as="f" t-key="f.stage">
+                                            <t t-set="width_pct" t-value="95 - (f_index * 12)"/>
+                                            <t t-set="width_pct" t-value="width_pct &lt; 30 ? 30 : width_pct"/>
+                                            <t t-set="st" t-value="f.stage ? f.stage.toLowerCase() : ''"/>
+                                            <t t-set="bg_style" t-value="
+                                                (st.includes('won') || st.includes('admission')) ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' :
+                                                (st.includes('lost') || st.includes('junk') || st.includes('not intrested')) ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' :
+                                                funnel_colors[f_index % funnel_colors.length]
+                                            "/>
+                                            <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mb-2 position-relative o_funnel_stage"
+                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s; cursor: pointer;"
+                                                 t-on-click="() => this.openLeadsList([['stage_id', '=', f.stage_id], ['user_id', '=', state.data.current_uid]], f.stage + ' Leads')">
+                                                <span class="z-1" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);"><t t-esc="f.stage"/> (<t t-esc="f.count"/>)</span>
+                                            </div>
+                                        </t>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Last Month Top 3 -->
+                            <!-- Micro Coaching Tips -->
                             <div class="col-md-6">
-                                <t t-if="state.data.last_month_leaderboard and state.data.last_month_leaderboard.length > 0">
-                                    <div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
-                                        <div class="card-header bg-white border-0 pt-4 pb-2">
-                                            <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-history text-secondary me-2"></i> Last Month's Top 3</h5>
-                                        </div>
-                                        <div class="card-body px-0 pt-0">
-                                            <div class="d-flex flex-column gap-3 px-3 pb-3">
-                                                <t t-foreach="state.data.last_month_leaderboard" t-as="rep" t-key="rep.name">
-                                                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4 border border-light bg-light">
-                                                        <div class="d-flex align-items-center gap-3">
-                                                            <div class="d-flex align-items-center justify-content-center rounded-circle fw-bold bg-white text-muted border shadow-sm" style="width: 36px; height: 36px; font-size: 0.9rem;">
-                                                                <t t-esc="rep_index + 1"/>
-                                                            </div>
-                                                            <div class="fw-bold text-dark"><t t-esc="rep.name"/></div>
-                                                        </div>
-                                                        <div class="text-center">
-                                                            <h5 class="fw-bolder mb-0 text-secondary"><t t-esc="rep.won"/></h5>
-                                                            <small class="text-uppercase fw-bold text-muted" style="font-size: 0.55rem;">Wins</small>
-                                                        </div>
-                                                    </div>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </t>
-                            </div>
-                        </div>
-                        <!-- Individual Pipeline -->
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-12">
-                                <div class="card shadow-sm border-0 text-white o_hover_lift" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 16px;">
+                                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100 o_hover_lift" style="border-radius: 16px;">
                                     <div class="card-body p-4 position-relative overflow-hidden">
-                                        <i class="fa fa-line-chart fa-5x position-absolute opacity-10" style="right: -10px; bottom: -10px; transform: rotate(-15deg);"></i>
-                                        <h5 class="fw-bold opacity-75 mb-4 text-uppercase tracking-wide"><i class="fa fa-bullseye me-2"></i> My Pipeline Overview</h5>
-                                        <div class="row g-4">
-                                            <div class="col-sm-4">
-                                                <h3 class="fw-bold mb-0">₹<t t-esc="state.data.my_pipeline.expected_revenue.toLocaleString()"/></h3>
-                                                <p class="small opacity-75 mb-0 fw-medium">Pipeline Revenue</p>
-                                            </div>
-                                            <div class="col-sm-4 border-start border-white border-opacity-25 ps-4">
-                                                <h3 class="fw-bold mb-0">₹<t t-esc="state.data.my_pipeline.avg_deal.toLocaleString()"/></h3>
-                                                <p class="small opacity-75 mb-0 fw-medium">Avg Deal Value</p>
-                                            </div>
-                                            <div class="col-sm-4 border-start border-white border-opacity-25 ps-4">
-                                                <h3 class="fw-bold mb-0"><t t-esc="state.data.my_pipeline.total_leads"/></h3>
-                                                <p class="small opacity-75 mb-0 fw-medium">Active Leads</p>
-                                            </div>
-                                        </div>
+                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2 text-warning"></i>
+                                        <h5 class="fw-bold text-dark mb-3"><i class="fa fa-graduation-cap me-2 text-warning"></i> Performance Insights</h5>
+                                        <t t-if="state.data.coaching_tips and state.data.coaching_tips.length > 0">
+                                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                                                <t t-foreach="state.data.coaching_tips" t-as="tip" t-key="tip">
+                                                    <li class="d-flex align-items-start gap-2">
+                                                        <i class="fa fa-check-circle text-success mt-1"></i>
+                                                        <span class="fw-medium text-dark"><t t-esc="tip"/></span>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                        </t>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Salesperson Dashboard -->
+                        <!-- Row 2: 4 Stat Cards -->
                         <div class="row g-4 mb-4">
-                            <!-- Hero Metrics / Top Row -->
                             <div class="col-md-3">
                                 <div class="card shadow-sm border-0 border-start border-success border-4 h-100 o_hover_lift" style="border-radius: 16px;">
                                     <div class="card-body p-4 text-center d-flex flex-column justify-content-center">
@@ -556,91 +518,11 @@
                             </div>
                         </div>
 
+                        <!-- Row 3: AI Assistant | Last Month Top Performer -->
                         <div class="row g-4 mb-4">
-                            <!-- Left Column: Priority Queue & AI -->
-                            <div class="col-md-8 d-flex flex-column gap-4">
-                                <!-- Smart Priority Queue -->
-                                <div class="card shadow-sm border-0" style="border-radius: 16px;">
-                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
-                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-list-alt me-2 text-primary"></i> Priority Queue</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row g-3">
-                                            <!-- Hot Leads -->
-                                            <div class="col-md-4">
-                                                <div class="bg-white border-top border-4 border-danger shadow-sm rounded-4 p-3 h-100">
-                                                    <h6 class="fw-bold text-danger mb-3 d-flex justify-content-between">
-                                                        <span><i class="fa fa-fire"></i> Hot Leads</span>
-                                                        <span class="badge bg-danger text-white rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
-                                                    </h6>
-                                                    <t t-if="state.data.hot_leads.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
-                                                            <t t-foreach="state.data.hot_leads" t-as="lead" t-key="lead.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-danger border-opacity-25 o_hover_lift" t-on-click="() => this.openLead(lead.id)">
-                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="lead.student_name || lead.name"/></div>
-                                                                    <div class="small text-muted d-flex justify-content-between">
-                                                                        <span><t t-esc="lead.probability"/>% Prob</span>
-                                                                        <span><t t-esc="lead.priority == '3' ? '⭐⭐⭐' : ''"/></span>
-                                                                    </div>
-                                                                </button>
-                                                            </t>
-                                                        </div>
-                                                    </t>
-                                                    <t t-else="">
-                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-check-circle fa-2x mb-2 text-danger"></i><p class="small mb-0">No hot leads right now.</p></div>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                            <!-- Due Today -->
-                                            <div class="col-md-4">
-                                                <div class="bg-white border-top border-4 border-warning shadow-sm rounded-4 p-3 h-100">
-                                                    <h6 class="fw-bold text-warning-emphasis mb-3 d-flex justify-content-between">
-                                                        <span><i class="fa fa-calendar-check-o text-warning"></i> Due Today</span>
-                                                        <span class="badge bg-warning text-dark rounded-pill"><t t-esc="state.data.due_today_activities.length"/></span>
-                                                    </h6>
-                                                    <t t-if="state.data.due_today_activities.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
-                                                            <t t-foreach="state.data.due_today_activities" t-as="act" t-key="act.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-warning border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
-                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
-                                                                    <div class="small text-muted text-truncate"><t t-esc="act.summary or 'Task'"/></div>
-                                                                </button>
-                                                            </t>
-                                                        </div>
-                                                    </t>
-                                                    <t t-else="">
-                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-smile-o fa-2x mb-2 text-warning-emphasis"></i><p class="small mb-0">All caught up today!</p></div>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                            <!-- Overdue -->
-                                            <div class="col-md-4">
-                                                <div class="bg-white border-top border-4 border-secondary shadow-sm rounded-4 p-3 h-100">
-                                                    <h6 class="fw-bold text-secondary mb-3 d-flex justify-content-between">
-                                                        <span><i class="fa fa-exclamation-circle"></i> Overdue</span>
-                                                        <span class="badge bg-secondary text-white rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
-                                                    </h6>
-                                                    <t t-if="state.data.overdue_activities.length > 0">
-                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 250px;">
-                                                            <t t-foreach="state.data.overdue_activities" t-as="act" t-key="act.id">
-                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-secondary border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
-                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
-                                                                    <div class="small text-danger fw-bold"><t t-esc="act.date_deadline"/></div>
-                                                                </button>
-                                                            </t>
-                                                        </div>
-                                                    </t>
-                                                    <t t-else="">
-                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-thumbs-up fa-2x mb-2 text-secondary"></i><p class="small mb-0">Nothing overdue!</p></div>
-                                                    </t>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- AI Suggestions -->
-                                <div class="card shadow-sm border-0 border-start border-warning border-4" style="border-radius: 16px;">
+                            <!-- AI Suggestions -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 border-start border-warning border-4 h-100" style="border-radius: 16px;">
                                     <div class="card-body py-4 overflow-auto">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <h6 class="text-uppercase text-warning fw-bold mb-0"><i class="fa fa-lightbulb-o me-2"></i> AI Pipeline Assistant</h6>
@@ -692,84 +574,152 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Right Column: Leaderboard & Coaching -->
-                            <div class="col-md-4 d-flex flex-column gap-4">
-                                <!-- Pipeline Funnel -->
-                                <div class="card shadow-sm border-0" style="border-radius: 16px;">
-                                    <div class="card-header bg-white border-0 pt-4 pb-0">
-                                        <h5 class="card-title fw-bold text-dark"><i class="fa fa-filter me-2 text-primary"></i> My Funnel</h5>
-                                    </div>
-                                    <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
-                                        <t t-set="max_funnel" t-value="state.data.my_funnel.length > 0 ? state.data.my_funnel[0].count : 1"/>
-                                        <t t-set="funnel_colors" t-value="[
-                                            'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)',
-                                            'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
-                                            'linear-gradient(90deg, #ec4899 0%, #db2777 100%)',
-                                            'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)',
-                                            'linear-gradient(90deg, #06b6d4 0%, #0891b2 100%)',
-                                            'linear-gradient(90deg, #6366f1 0%, #4f46e5 100%)'
-                                        ]"/>
-                                        <t t-foreach="state.data.my_funnel" t-as="f" t-key="f.stage">
-                                            <t t-set="width_pct" t-value="95 - (f_index * 12)"/>
-                                            <t t-set="width_pct" t-value="width_pct &lt; 30 ? 30 : width_pct"/>
-                                            <t t-set="st" t-value="f.stage ? f.stage.toLowerCase() : ''"/>
-                                            <t t-set="bg_style" t-value="
-                                                (st.includes('won') || st.includes('admission')) ? 'linear-gradient(90deg, #10b981 0%, #059669 100%)' :
-                                                (st.includes('lost') || st.includes('junk') || st.includes('not intrested')) ? 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)' :
-                                                funnel_colors[f_index % funnel_colors.length]
-                                            "/>
-                                            <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm mb-2 position-relative o_funnel_stage"
-                                                 t-attf-style="background: {{bg_style}}; width: {{width_pct}}%; height: 48px; clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%); transition: transform 0.3s; cursor: pointer;"
-                                                 t-on-click="() => this.openLeadsList([['stage_id', '=', f.stage_id], ['user_id', '=', state.data.current_uid]], f.stage + ' Leads')">
-                                                <span class="z-1" style="text-shadow: 0 1px 2px rgba(0,0,0,0.3);"><t t-esc="f.stage"/> (<t t-esc="f.count"/>)</span>
+                            <!-- Last Month Top Performer -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100" style="background: linear-gradient(135deg, #fef08a 0%, #facc15 100%); border-radius: 16px;">
+                                    <div class="card-body p-4 text-center d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden">
+                                        <i class="fa fa-star fa-5x position-absolute opacity-10" style="right: -10px; bottom: -10px; transform: rotate(-15deg);"></i>
+                                        <h5 class="fw-bold text-dark opacity-75 mb-4 text-uppercase tracking-wide">Last Month's Top Performer</h5>
+                                        <t t-if="state.data.last_month_leaderboard and state.data.last_month_leaderboard.length > 0">
+                                            <t t-set="top_rep" t-value="state.data.last_month_leaderboard[0]"/>
+                                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white text-warning shadow mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                <i class="fa fa-trophy"></i>
+                                            </div>
+                                            <h2 class="fw-bold text-dark mb-1"><t t-esc="top_rep.name"/></h2>
+                                            <h4 class="fw-bolder mb-0 text-dark opacity-75"><t t-esc="top_rep.won"/> Wins</h4>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="text-center opacity-50">
+                                                <i class="fa fa-question-circle fa-3x mb-2 text-dark"></i>
+                                                <p class="mb-0 fw-bold text-dark">No data available.</p>
                                             </div>
                                         </t>
                                     </div>
                                 </div>
-                                
-                                <!-- Micro Coaching Tips -->
-                                <div class="card shadow-sm border-0 border-start border-warning border-4 o_hover_lift" style="border-radius: 16px;">
-                                    <div class="card-body p-4 position-relative overflow-hidden">
-                                        <i class="fa fa-bullseye fa-4x position-absolute top-0 end-0 opacity-10 mt-n2 me-n2 text-warning"></i>
-                                        <h5 class="fw-bold text-dark mb-3"><i class="fa fa-graduation-cap me-2 text-warning"></i> Performance Insights</h5>
-                                        <t t-if="state.data.coaching_tips and state.data.coaching_tips.length > 0">
-                                            <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
-                                                <t t-foreach="state.data.coaching_tips" t-as="tip" t-key="tip">
-                                                    <li class="d-flex align-items-start gap-2">
-                                                        <i class="fa fa-check-circle text-success mt-1"></i>
-                                                        <span class="fw-medium text-dark"><t t-esc="tip"/></span>
-                                                    </li>
-                                                </t>
-                                            </ul>
-                                        </t>
-                                    </div>
-                                </div>
-
-                                <!-- Empty Leaderboards Replaced -->
-                                
-                                <!-- Top Lost Reasons -->
-                                <t t-if="state.data.top_lost_reasons and state.data.top_lost_reasons.length > 0">
-                                    <div class="card shadow-sm border-0" style="border-radius: 16px;">
-                                        <div class="card-header bg-white border-0 pt-4 pb-2">
-                                            <h6 class="card-title fw-bold text-muted text-uppercase tracking-wide mb-0">Top Lost Reasons</h6>
-                                        </div>
-                                        <div class="card-body pt-0">
-                                            <div class="d-flex flex-column gap-2">
-                                                <t t-foreach="state.data.top_lost_reasons" t-as="reason" t-key="reason.reason">
-                                                    <div class="d-flex justify-content-between align-items-center p-2 bg-light rounded-3">
-                                                        <span class="fw-medium text-dark"><t t-esc="reason.reason"/></span>
-                                                        <span class="badge bg-secondary"><t t-esc="reason.count"/></span>
-                                                    </div>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </t>
                             </div>
                         </div>
 
-                    </t>
+                        <!-- Row 4: Priority Queue | This Month Leaderboard -->
+                        <div class="row g-4 mb-4">
+                            <!-- Priority Queue -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
+                                    <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-list-alt me-2 text-primary"></i> Priority Queue</h5>
+                                    </div>
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="row g-3 flex-grow-1">
+                                            <!-- Hot Leads -->
+                                            <div class="col-12">
+                                                <div class="bg-white border-top border-4 border-danger shadow-sm rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-danger mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-fire"></i> Hot Leads</span>
+                                                        <span class="badge bg-danger text-white rounded-pill"><t t-esc="state.data.hot_leads.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.hot_leads.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 150px;">
+                                                            <t t-foreach="state.data.hot_leads" t-as="lead" t-key="lead.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-danger border-opacity-25 o_hover_lift" t-on-click="() => this.openLead(lead.id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="lead.student_name || lead.name"/></div>
+                                                                    <div class="small text-muted d-flex justify-content-between">
+                                                                        <span><t t-esc="lead.probability"/>% Prob</span>
+                                                                        <span><t t-esc="lead.priority == '3' ? '⭐⭐⭐' : ''"/></span>
+                                                                    </div>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-check-circle fa-2x mb-2 text-danger"></i><p class="small mb-0">No hot leads right now.</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                            <!-- Due Today -->
+                                            <div class="col-12">
+                                                <div class="bg-white border-top border-4 border-warning shadow-sm rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-warning-emphasis mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-calendar-check-o text-warning"></i> Due Today</span>
+                                                        <span class="badge bg-warning text-dark rounded-pill"><t t-esc="state.data.due_today_activities.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.due_today_activities.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 150px;">
+                                                            <t t-foreach="state.data.due_today_activities" t-as="act" t-key="act.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-warning border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
+                                                                    <div class="small text-muted text-truncate"><t t-esc="act.summary or 'Task'"/></div>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-smile-o fa-2x mb-2 text-warning-emphasis"></i><p class="small mb-0">All caught up today!</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                            <!-- Overdue -->
+                                            <div class="col-12">
+                                                <div class="bg-white border-top border-4 border-secondary shadow-sm rounded-4 p-3 h-100">
+                                                    <h6 class="fw-bold text-secondary mb-3 d-flex justify-content-between">
+                                                        <span><i class="fa fa-exclamation-circle"></i> Overdue</span>
+                                                        <span class="badge bg-secondary text-white rounded-pill"><t t-esc="state.data.overdue_activities.length"/></span>
+                                                    </h6>
+                                                    <t t-if="state.data.overdue_activities.length > 0">
+                                                        <div class="d-flex flex-column gap-2 overflow-auto custom-scrollbar" style="max-height: 150px;">
+                                                            <t t-foreach="state.data.overdue_activities" t-as="act" t-key="act.id">
+                                                                <button class="btn btn-light text-start p-2 rounded-3 shadow-sm border border-secondary border-opacity-25 o_hover_lift" t-on-click="() => this.openActivity('crm.lead', act.res_id)">
+                                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem;"><t t-esc="act.display_name"/></div>
+                                                                    <div class="small text-danger fw-bold"><t t-esc="act.date_deadline"/></div>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <div class="text-center my-4 opacity-50"><i class="fa fa-thumbs-up fa-2x mb-2 text-secondary"></i><p class="small mb-0">Nothing overdue!</p></div>
+                                                    </t>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- This Month's Leaderboard -->
+                            <div class="col-md-6">
+                                <div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
+                                    <div class="card-header bg-white border-0 pt-4 pb-2">
+                                        <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-trophy text-warning me-2"></i> This Month's Leaderboard</h5>
+                                    </div>
+                                    <div class="card-body px-0 pt-0">
+                                        <div class="d-flex flex-column gap-3 px-3 pb-3">
+                                            <t t-foreach="state.data.leaderboard" t-as="rep" t-key="rep.user_id">
+                                                <div t-attf-class="d-flex justify-content-between align-items-center p-3 rounded-4 border {{ rep.user_id == state.data.current_uid ? 'border-primary bg-primary bg-opacity-10 shadow-sm' : 'border-light bg-light o_hover_lift' }}">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div t-attf-class="d-flex align-items-center justify-content-center rounded-circle fw-bold {{ rep.rank == 1 ? 'bg-warning text-dark shadow-sm' : (rep.rank == 2 ? 'bg-secondary text-white shadow-sm' : (rep.rank == 3 ? 'bg-danger bg-opacity-75 text-white shadow-sm' : 'bg-white text-muted border')) }}" style="width: 42px; height: 42px; font-size: 1.1rem;">
+                                                            <t t-if="rep.rank == 1"><i class="fa fa-trophy"></i></t>
+                                                            <t t-else=""><t t-esc="rep.rank"/></t>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-bold text-dark" style="font-size: 1.05rem;"><t t-esc="rep.user_name"/></div>
+                                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                                <t t-foreach="rep.badges" t-as="badge" t-key="badge">
+                                                                    <span class="badge bg-white text-dark shadow-sm border border-light" style="font-size: 0.65rem; padding: 0.35em 0.6em;"><t t-esc="badge"/></span>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center p-2 rounded-3 border bg-white shadow-sm" style="min-width: 60px;">
+                                                        <h3 class="fw-bolder mb-0 text-primary" style="line-height: 1;"><t t-esc="rep.won"/></h3>
+                                                        <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">Wins</small>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </t>                  </t>
                 </div>
             </t>
             
