@@ -5,11 +5,11 @@
         <field name="model">res.users</field>
         <field name="inherit_id" ref="base.view_users_form"/>
         <field name="arch" type="xml">
-            <!-- <xpath expr="//notebook/page[@name='access_rights']" position="inside">
+            <xpath expr="//notebook/page[@name='access_rights']" position="inside">
                 <group string="CRM Dashboard Settings">
                     <field name="hide_from_dashboard"/>
                 </group>
-            </xpath> -->
+            </xpath>
         </field>
     </record>
 </odoo>
