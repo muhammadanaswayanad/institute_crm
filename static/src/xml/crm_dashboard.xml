@@ -412,6 +412,32 @@
 
                     <!-- REGULAR SALESPERSON VIEW -->
                     <t t-else="">
+                        <!-- Individual Pipeline -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-12">
+                                <div class="card shadow-sm border-0 text-white o_hover_lift" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 16px;">
+                                    <div class="card-body p-4 position-relative overflow-hidden">
+                                        <i class="fa fa-line-chart fa-5x position-absolute opacity-10" style="right: -10px; bottom: -10px; transform: rotate(-15deg);"></i>
+                                        <h5 class="fw-bold opacity-75 mb-4 text-uppercase tracking-wide"><i class="fa fa-bullseye me-2"></i> My Pipeline Overview</h5>
+                                        <div class="row g-4">
+                                            <div class="col-sm-4">
+                                                <h3 class="fw-bold mb-0">₹<t t-esc="state.data.my_pipeline.expected_revenue.toLocaleString()"/></h3>
+                                                <p class="small opacity-75 mb-0 fw-medium">Pipeline Revenue</p>
+                                            </div>
+                                            <div class="col-sm-4 border-start border-white border-opacity-25 ps-4">
+                                                <h3 class="fw-bold mb-0">₹<t t-esc="state.data.my_pipeline.avg_deal.toLocaleString()"/></h3>
+                                                <p class="small opacity-75 mb-0 fw-medium">Avg Deal Value</p>
+                                            </div>
+                                            <div class="col-sm-4 border-start border-white border-opacity-25 ps-4">
+                                                <h3 class="fw-bold mb-0"><t t-esc="state.data.my_pipeline.total_leads"/></h3>
+                                                <p class="small opacity-75 mb-0 fw-medium">Active Leads</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Salesperson Dashboard -->
                         <div class="row g-4 mb-4">
                             <!-- Hero Metrics / Top Row -->
@@ -652,6 +678,33 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Last Month Top 3 -->
+                                <t t-if="state.data.last_month_leaderboard and state.data.last_month_leaderboard.length > 0">
+                                    <div class="card shadow-sm border-0 flex-fill" style="border-radius: 16px;">
+                                        <div class="card-header bg-white border-0 pt-4 pb-2">
+                                            <h5 class="card-title fw-bold text-dark mb-0"><i class="fa fa-history text-secondary me-2"></i> Last Month's Top 3</h5>
+                                        </div>
+                                        <div class="card-body px-0 pt-0">
+                                            <div class="d-flex flex-column gap-3 px-3 pb-3">
+                                                <t t-foreach="state.data.last_month_leaderboard" t-as="rep" t-key="rep.name">
+                                                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4 border border-light bg-light">
+                                                        <div class="d-flex align-items-center gap-3">
+                                                            <div class="d-flex align-items-center justify-content-center rounded-circle fw-bold bg-white text-muted border shadow-sm" style="width: 36px; height: 36px; font-size: 0.9rem;">
+                                                                <t t-esc="rep_index + 1"/>
+                                                            </div>
+                                                            <div class="fw-bold text-dark"><t t-esc="rep.name"/></div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <h5 class="fw-bolder mb-0 text-secondary"><t t-esc="rep.won"/></h5>
+                                                            <small class="text-uppercase fw-bold text-muted" style="font-size: 0.55rem;">Wins</small>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
                                 
                                 <!-- Top Lost Reasons -->
                                 <t t-if="state.data.top_lost_reasons and state.data.top_lost_reasons.length > 0">

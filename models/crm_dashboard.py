@@ -109,7 +109,7 @@ class CrmDashboard(models.AbstractModel):
             # --- 2. Leaderboard ---
             first_of_month = today.replace(day=1)
             won_this_month = self.env['crm.lead'].sudo().read_group(
-                [('stage_id.is_won', '=', True), ('write_date', '>=', first_of_month)],
+                [('stage_id.is_won', '=', True), ('date_closed', '>=', first_of_month)],
                 ['user_id', 'day_close:avg'],
                 ['user_id'],
                 lazy=False
@@ -143,6 +143,29 @@ class CrmDashboard(models.AbstractModel):
                     'badges': badges,
                     'rank': index + 1
                 })
+            data['leaderboard'] = leaderboard
+            
+            # Last month top 3
+            first_of_last_month = (first_of_month - timedelta(days=1)).replace(day=1)
+            won_last_month = self.env['crm.lead'].sudo().read_group(
+                [('stage_id.is_won', '=', True), ('date_closed', '>=', first_of_last_month), ('date_closed', '<', first_of_month)],
+                ['user_id'],
+                ['user_id'],
+                lazy=False
+            )
+            won_last_month.sort(key=lambda x: x['__count'], reverse=True)
+            last_month_leaderboard = []
+            for res in won_last_month:
+                if not res['user_id']: continue
+                u_id = res['user_id'][0]
+                if u_id in hidden_user_ids: continue
+                last_month_leaderboard.append({
+                    'name': res['user_id'][1],
+                    'won': res['__count']
+                })
+                if len(last_month_leaderboard) == 3:
+                    break
+            data['last_month_leaderboard'] = last_month_leaderboard
             
             for rep in leaderboard:
                 if rep['user_id'] == fastest_closer:
@@ -252,8 +275,18 @@ class CrmDashboard(models.AbstractModel):
                 'converted_leads': user_won,
             })
             
+            my_open_leads = self.env['crm.lead'].search([('user_id', '=', uid), ('stage_id.is_won', '=', False), ('active', '=', True)])
+            my_revenue = sum(my_open_leads.mapped('expected_revenue'))
+            my_avg_deal = my_revenue / len(my_open_leads) if my_open_leads else 0
+            
+            data['my_pipeline'] = {
+                'expected_revenue': my_revenue,
+                'avg_deal': round(my_avg_deal),
+                'total_leads': len(my_open_leads)
+            }
+            
         else:
-            # CRM ADMIN LOGIC
+            # NORMAL MANAGER LOGIC
             
             # --- 1. Problem Alerts ---
             three_days_ago = fields.Datetime.now() - timedelta(days=3)
@@ -330,6 +363,14 @@ class CrmDashboard(models.AbstractModel):
             )
             
             performance = {}
+            sales_users = self.env['res.users'].search([
+                ('share', '=', False),
+                ('groups_id', 'in', self.env.ref('sales_team.group_sale_salesman').id)
+            ])
+            for u in sales_users:
+                if u.id not in hidden_user_ids:
+                    performance[u.name] = {'user_id': u.id, 'total': 0, 'won': 0, 'stages': {}}
+            
             for res in leads_group:
                 user_id = res['user_id'][0] if res['user_id'] else False
                 if user_id in hidden_user_ids:
@@ -347,7 +388,7 @@ class CrmDashboard(models.AbstractModel):
             
             won_domain = [('stage_id.is_won', '=', True)]
             if timeframe == 'month':
-                won_domain.append(('write_date', '>=', first_of_month))
+                won_domain.append(('date_closed', '>=', first_of_month))
                 
             won_leads_group = self.env['crm.lead'].read_group(
                 won_domain,
