@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="group_hide_from_dashboard" model="res.groups">
+            <field name="name">Hide from CRM Dashboard</field>
+            <field name="category_id" ref="base.module_category_hidden"/>
+            <field name="comment">Users in this group will not appear on the CRM Dashboard leaderboards or heatmaps.</field>
+        </record>
+    </data>
+</odoo>

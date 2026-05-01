@@ -37,9 +37,12 @@ class CrmDashboard(models.AbstractModel):
         }
         user_name = self.env.user.name.split()[0] if self.env.user.name else 'there'
         
-        # Fetch hidden users
-        hidden_users = self.env['res.users'].search([('hide_from_dashboard', '=', True)])
-        hidden_user_ids = hidden_users.ids
+        # Fetch hidden users from security group
+        hidden_group = self.env.ref('institute_crm.group_hide_from_dashboard', raise_if_not_found=False)
+        if hidden_group:
+            hidden_user_ids = hidden_group.users.ids
+        else:
+            hidden_user_ids = []
         
         # General Data
         welcome_msgs = [
