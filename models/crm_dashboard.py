@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from datetime import timedelta
+from datetime import datetime, timedelta, time
 import random
 import json
 import logging
@@ -224,9 +224,58 @@ class CrmDashboard(models.AbstractModel):
                     am_pm = "AM" if best_hour < 12 else "PM"
                     coaching_tips.append(f"You close most of your deals in the {time_of_day} (around {display_hour}:00 {am_pm}).")
 
+            # --- Advanced Coaching Insights ---
+            user_rank = next((r['rank'] for r in leaderboard if r['user_id'] == uid), None)
+            if user_rank and user_rank > 3:
+                top_3_won = next((r['won'] for r in leaderboard if r['rank'] == 3), 0)
+                diff = top_3_won - user_won
+                if diff > 0 and diff <= 5:
+                    coaching_tips.append(f"⚡ You’re just {diff} deal{'s' if diff > 1 else ''} away from the Top 3!")
+
+            if trend_percent > 0:
+                coaching_tips.append(f"📈 Great momentum! Your win rate improved by +{trend_percent}% vs last week.")
+            elif trend_percent < 0:
+                coaching_tips.append(f"📉 Your win volume dropped {abs(trend_percent)}% vs last week. Let's push hard!")
+
+            # Task Completion
+            today_str = fields.Date.today()
+            due_today_count = self.env['mail.activity'].search_count([
+                ('user_id', '=', uid), ('res_model', '=', 'crm.lead'), ('date_deadline', '=', today_str)
+            ])
+            today_dt = datetime.combine(today, time.min)
+            completed_today_count = self.env['mail.message'].search_count([
+                ('author_id.user_ids', 'in', [uid]), ('model', '=', 'crm.lead'),
+                ('subtype_id', '=', self.env.ref('mail.mt_activities').id),
+                ('date', '>=', today_dt)
+            ])
+            total_today = due_today_count + completed_today_count
+            if total_today > 0:
+                pct = int((completed_today_count / total_today) * 100)
+                if pct > 0:
+                    coaching_tips.append(f"🏁 {pct}% of your scheduled tasks for today are completed.")
+
+            # Missed yesterday
+            yesterday = today - timedelta(days=1)
+            missed_yesterday = self.env['mail.activity'].search_count([
+                ('user_id', '=', uid), ('res_model', '=', 'crm.lead'), ('date_deadline', '=', yesterday)
+            ])
+            if missed_yesterday > 0:
+                coaching_tips.append(f"⚠️ You missed {missed_yesterday} scheduled follow-up{'s' if missed_yesterday > 1 else ''} yesterday.")
+
+            # Neglected leads
+            two_days_ago = fields.Datetime.now() - timedelta(days=2)
+            neglected_leads = self.env['crm.lead'].search_count([
+                ('user_id', '=', uid), 
+                ('stage_id.is_won', '=', False),
+                ('active', '=', True),
+                ('activity_ids', '=', False),
+                ('write_date', '<', two_days_ago)
+            ])
+            if neglected_leads > 0:
+                coaching_tips.append(f"🕰️ {neglected_leads} active leads haven't had any updates in over 48 hours.")
+
             if not coaching_tips:
                 coaching_tips.append("Keep following up on your activities to discover your best closing strategies.")
-
             # --- 6. Priority Queue ---
             Activity = self.env['mail.activity']
             base_act_domain = [('user_id', '=', uid), ('res_model', '=', 'crm.lead')]
