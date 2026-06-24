@@ -22,7 +22,7 @@
     'author': 'Custom Development',
     'website': '',
     'depends': ['crm'],
-    'external_dependencies': {'python': ['openai']},
+    # 'external_dependencies': {'python': ['openai']},
     'data': [
         'security/saas_security.xml',
         'security/security.xml',
